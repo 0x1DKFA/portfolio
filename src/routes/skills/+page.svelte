@@ -1,1 +1,0 @@
-<h1> Skill Card </h1>
