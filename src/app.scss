@@ -3,8 +3,24 @@ html {
   scroll-behavior: smooth;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  font-family: "DM Sans", sans-serif;
+}
+
+body {
+  background: #0c0c1d;
+  color: lightgrey;
+}
+
 section {
   height: 100vh;
   scroll-snap-align: center;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
