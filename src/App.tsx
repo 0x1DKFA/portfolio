@@ -8,10 +8,6 @@ function App() {
       <section>
         <Navbar />
       </section>
-      <section>section test</section>
-      <section>section test</section>
-      <section>section test</section>
-      <section>section test</section>
     </>
   )
 }
