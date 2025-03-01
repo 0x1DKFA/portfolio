@@ -1,0 +1,28 @@
+.hero {
+    height: 100%;
+    overflow-x: hidden;
+    display: flex;
+}
+
+.hSection {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hSection.right {
+    align-items: end;
+}
+
+.hTitle {
+    margin-top: 50px;
+    font-size: 100px;
+    color: pink;
+}
+
+.hTitle span {
+    color: #fff;
+}
+

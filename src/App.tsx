@@ -1,14 +1,28 @@
-import './app.scss';
-import Navbar from './components/navbar/Navbar';
+import Contact from './components/contact/Contact';
+import Hero from './components/hero/Hero';
+import Portfolio from './components/portfolio/Portfolio';
+import Services from './components/services/Service';
 
 function App() {
 
   return (
-    <>
-      <section>
-        <Navbar />
+    <div className='container'>
+      <section id='#hero'>
+        <Hero />
       </section>
-    </>
+
+      <section id='#services'>
+        <Services />
+      </section>
+
+      <section id='#portfolio'>
+        <Portfolio />
+      </section>
+
+      <section id='#contact'>
+        <Contact />
+      </section>
+    </div>
   )
 }
 
