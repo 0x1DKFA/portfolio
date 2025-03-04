@@ -1,17 +1,45 @@
+import { motion } from 'motion/react'
 import './hero.css';
 import Speech from './Speech';
+
+const socialVariants = {
+    initial: {
+        y: -100,
+        opacity: 0,
+    },
+    animate: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            duration: 1,
+            staggerChildren: 0.2,
+        }
+    }
+}
 
 const Hero = () => {
     return (
         <div className="hero">
             <div className='hSection left'>
-                <h1 className='hTitle'>
+                <motion.h1 className='hTitle'
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 1 }}
+                >
                     Hey There,
                     <br />
                     <span>I'm Rohit</span>
-                </h1>
+                </motion.h1>
 
-                <a href='#services'>
+                <motion.a
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{
+                        repeat: Infinity,
+                        duration: 4,
+                        ease: "easeInOut"
+                    }}
+                    href='#services'
+                >
                     <svg
                         width="50px"
                         height="50px"
@@ -31,26 +59,49 @@ const Hero = () => {
                             strokeLinecap="round"
                         />
                     </svg>
-                </a>
+                </motion.a>
             </div>
 
-            <div className='hsection right'>
-                <div className='social'>
-                    <a href='/'>
+            <div className='hSection right'>
+                <motion.div variants={socialVariants} initial="initial" animate="animate" className='social'>
+                    <motion.a variants={socialVariants} href='/'>
                         <img src='/github.svg' alt='github' />
-                    </a>
-                    <a href='/'>
+                    </motion.a>
+                    <motion.a variants={socialVariants} href='/'>
                         <img src='/linkedin.svg' alt='linkedin' />
-                    </a>
-                    <a href='/'>
+                    </motion.a>
+                    <motion.a variants={socialVariants} href='/'>
                         <img src='/stackoverflow.svg' alt='stackoverflow' />
-                    </a>
-                </div>
+                    </motion.a>
+                    <motion.div variants={socialVariants} className='letsConnectContainer'>
+                        <div className='letsConnectText'>Let's connect!</div>
+                    </motion.div>
+                </motion.div>
 
                 <Speech />
 
-                <a href='/#contact' className='contactLink'>
-                    <div className='contactButton'>
+                <motion.a
+                    href='/#contact'
+                    className='contactLink'
+                    animate={{
+                        x: [100, 0],
+                        opacity: [0, 1],
+                    }}
+                    transition={{
+                        duration: 1,
+                    }}
+                >
+                    <motion.div 
+                        className='contactButton'
+                        animate={{
+                            rotate: [0, 360],
+                        }}
+                        transition={{
+                            duration: 10,
+                            repeat: Infinity,
+                            ease: "linear",
+                        }}
+                    >
                         <svg viewBox="0 0 200 200" width="150" height="150">
                             <circle cx="100" cy="100" r="90" fill="pink" />
                             <path
@@ -81,8 +132,8 @@ const Hero = () => {
                                 <polyline points="9 6 18 6 18 15" />
                             </svg>
                         </div>
-                    </div>
-                </a>
+                    </motion.div>
+                </motion.a>
             </div>
         </div>
     )
