@@ -7,6 +7,7 @@ void test_rng(void);
 void test_events(void);
 void test_draw(void);
 void test_font(void);
+void test_bug(void);
 
 int main(void) {
     RUN(test_harness);
@@ -14,6 +15,7 @@ int main(void) {
     RUN(test_events);
     RUN(test_draw);
     RUN(test_font);
+    RUN(test_bug);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
