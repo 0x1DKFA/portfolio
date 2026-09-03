@@ -31,4 +31,22 @@ typedef struct World {
     float time;
 } World;
 
+#define FX_DUST_TIME 0.4f
+#define FX_PLUS1_TIME 0.8f
+#define FX_POOF_TIME 0.4f
+
+void  world_init(World *w, uint32_t seed, int panel_w, int panel_h, int gap_w, EventQueue *events);
+int   world_side_of_x(const World *w, float x);
+float world_panel_x0(const World *w, int side);
+float world_panel_center_x(const World *w, int side);
+int   world_hero_side(const World *w);
+int   world_bug_count(const World *w, int side);
+Bug  *world_spawn_bug(World *w, int side);
+Bug  *world_spawn_bug_at(World *w, int side, float x, float y);
+Bug  *world_nearest_bug(World *w, int side, float x, float y);
+int   world_squash_near(World *w, float x, float y, float radius);
+Fx   *world_spawn_fx(World *w, int kind, float x, float y);
+void  world_clear_scripted_bugs(World *w);
+void  world_update_actors(World *w, float dt);
+
 #endif

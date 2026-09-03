@@ -2,8 +2,6 @@
 #include "world.h"
 #include "fmath.h"
 
-static float panel_x0(const World *w, int side) { return side == SIDE_RIGHT ? (float)(w->panel_w + w->gap_w) : 0.0f; }
-
 void bug_spawn(Bug *b, int side, float x, float y, int variant) {
     b->state = BUG_WANDER; b->side = side; b->variant = variant;
     b->x = x; b->y = y; b->vx = 0; b->vy = 0; b->timer = 0;
@@ -27,7 +25,7 @@ static void wander(Bug *b, World *w, float dt) {
     }
     b->x += b->vx * dt;
     b->y += b->vy * dt;
-    float x0 = panel_x0(w, b->side) + BUG_W / 2, x1 = panel_x0(w, b->side) + w->panel_w - BUG_W / 2;
+    float x0 = world_panel_x0(w, b->side) + BUG_W / 2, x1 = world_panel_x0(w, b->side) + w->panel_w - BUG_W / 2;
     if (b->x < x0) { b->x = x0; b->vx = -b->vx; }
     if (b->x > x1) { b->x = x1; b->vx = -b->vx; }
     if (b->y < (float)w->floor_top)    { b->y = (float)w->floor_top;    b->vy = -b->vy; }
