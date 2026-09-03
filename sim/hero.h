@@ -1,5 +1,5 @@
-#ifndef HERO_H
-#define HERO_H
+#ifndef HERO_H_HEADER
+#define HERO_H_HEADER
 
 #define HERO_W 14
 #define HERO_H 20

@@ -1,5 +1,5 @@
-#ifndef BUG_H
-#define BUG_H
+#ifndef BUG_H_HEADER
+#define BUG_H_HEADER
 
 #define BUG_W 10
 #define BUG_H 8
