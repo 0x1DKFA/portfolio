@@ -54,4 +54,14 @@ void test_regression(void) {
     v->exit(&w);
     CHECK_EQ(regression_shield(), 0);
     CHECK_EQ(world_bug_count(&w, SIDE_LEFT), 0);
+
+    /* bouncer must spawn within reach of the shield even near a panel edge */
+    events_init(&ev);
+    world_init(&w, 33u, 96, 240, 200, &ev);
+    w.hero.x = 84.0f; w.hero.facing = 1;
+    boundaries = 0;
+    v->enter(&w);
+    run(v, 420);                                              /* t = 7.0, end of BOUNCE */
+    CHECK_EQ(regression_phase(), REG_CLEAR);
+    CHECK_EQ(regression_bounced(), 1);
 }

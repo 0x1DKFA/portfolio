@@ -70,8 +70,7 @@ static void begin_phase(World *w, int phase) {
     case REG_THINK:  hero_set_action(h, HERO_THINK); break;
     case REG_SHIELD: hero_set_action(h, HERO_IDLE); break;
     case REG_BOUNCE: {
-        float x0 = world_panel_x0(w, S.side);
-        float from = h->facing > 0 ? x0 + (float)w->panel_w - 6.0f : x0 + 6.0f;
+        float from = clamp_x(w, S.shield_x + (float)h->facing * 50.0f);
         S.bouncer = spawn_still(w, from, S.shield_y);
         if (S.bouncer) bug_set_target(S.bouncer, S.shield_x + (float)h->facing * 5.0f, S.shield_y);
         break;
