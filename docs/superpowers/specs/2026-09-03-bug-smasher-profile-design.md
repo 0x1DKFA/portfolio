@@ -3,7 +3,7 @@
 - **Date:** 2026-09-03
 - **Status:** Approved design, ready for implementation planning
 - **Owner:** Rohit Kumar
-- **Revision:** 3 — added the greenfield settlement stage (phase 2) and the engine stage abstraction
+- **Revision:** 3.1 — wording amendments after the phase 1 implementation (budgets, latency, resize, debug hooks)
 
 ## 1. Purpose and audience
 
@@ -91,7 +91,7 @@ Phases, in order:
 3. **Collide and glitch (2s):** the bugs collide at the box; the box flickers between values, turns red, jitters.
 4. **Lock (2s):** the character walks up and drops a padlock on the box.
 5. **Queue (3s):** three bugs approach one at a time, each waits for the previous to finish, each update is clean.
-6. **Resolved (0.5s):** the box turns green; the character wipes their brow.
+6. **Resolved (0.5s):** the box turns green; the character wipes their brow (optional pose; the placeholder art omits it).
 
 Beat boundaries: between phases. Done after phase 6; props are removed on exit.
 
@@ -182,12 +182,12 @@ Same 150ms hover-intent rule as the case files.
 
 - **Hover intent:** `pointerenter` on a case file starts a 150ms timer; on expiry the shim calls the simulation's `sim_request(vignetteId)`. `pointerleave` cancels the timer only. Sweeping the cursor across a card does nothing.
 - **Keyboard:** `focusin` on a case file requests immediately.
-- **Request semantics:** the simulation holds at most one pending request. A newer request replaces an older pending one. A request for the currently playing vignette is ignored. The swap happens at the current vignette's next beat boundary. Target worst-case latency: about one second.
+- **Request semantics:** the simulation holds at most one pending request. A newer request replaces an older pending one. A request for the currently playing vignette is ignored. The swap happens at the current vignette's next beat boundary. From patrol that is under half a second; inside another vignette it is the time to that vignette's next boundary, up to about three seconds in the detective's FOLLOW phase.
 - **Location:** the vignette plays wherever the character is. A crossover in progress finishes first.
 - **Feedback in the card:** while a vignette plays, its case file gets a subtle glow and a small pixel play icon. Removed on the `VIGNETTE_END` event.
 - **Leaving the card does not stop the vignette.** It always plays to completion, then patrol resumes.
 - **Idle auto-play:** if no hover request has arrived for 45 seconds, the simulation picks a linked vignette at random (never the same one twice in a row), plays it, and emits `VIGNETTE_START` with the auto flag set so the shim highlights the matching card. This is the path most passive viewers will experience.
-- **Debug hook:** a `?vignette=<name>` query parameter makes the shim call `sim_request` immediately after init, for manual verification.
+- **Debug hooks:** a `?vignette=<name>` query parameter makes the shim call `sim_request` immediately after init, and `?motion=reduce` forces static mode, both for manual verification.
 
 ## 9. Architecture
 
@@ -322,12 +322,12 @@ Instantiate the module with `WebAssembly.instantiateStreaming`; compute logical 
 ## 13. Resilience
 
 - The failure mode is always "hero card still works." Wasm fetch or instantiation failure, canvas creation failure, or any shim exception falls back to the hero-only layout with the panels left as plain background colour.
-- Resize is handled by `ResizeObserver`; the shim recomputes the integer scale and calls `sim_init` again only when logical sizes change, otherwise just re-letterboxes.
+- Resize is handled by `ResizeObserver`, debounced by about 200 ms so a window drag does not restart the scene on every pixel; the shim recomputes the integer scale and calls `sim_init` again only when logical sizes change, otherwise just re-letterboxes.
 - The resume link and all below-the-fold content are plain HTML and never depend on JavaScript or wasm. If the oasis stage fails for any reason the project cards still read as plain text and the canvas stays sand-coloured.
 
 ## 14. Performance and load budget
 
-- `sim.wasm` under 40KB uncompressed in phase 1 and under 64KB with the oasis stage; `shim.js` under 3KB in phase 1 and under 5KB in phase 2. Comparable to the earlier JavaScript design and with fewer requests.
+- `sim.wasm` under 40KB uncompressed in phase 1 and under 64KB with the oasis stage; `shim.js` under 3KB gzipped in phase 1 and under 5KB gzipped in phase 2. Comparable to the earlier JavaScript design and with fewer requests.
 - The hero card renders before any script runs; the module script is deferred, so first paint is unaffected.
 - At most 20 bugs per side; the bugs renderer touches at most 2 × 96 × 320 pixels per frame and the oasis renderer 320 × 80. Target under 1ms of CPU per frame per stage including the blit. The oasis stage only updates while its section is in view.
 - No web fonts in version one; system monospace stack for the hero card.
