@@ -111,6 +111,26 @@ void test_sim(void) {
     }
     CHECK(left_dimmed);
 
+    /* a real crossover happens through natural scene transitions, not a scripted request */
+    CHECK_EQ(sim_init(21u, 96, 240, 200), 0);
+    int seen_left = 0, seen_right = 0, both_at_once = 0;
+    int total_frames = 130000 / 17;
+    for (int i = 0; i < total_frames; i++) {
+        sim_update(17);
+        if ((i + 1) % 60 == 0) {
+            sim_render();
+            px = sim_framebuffer();
+            int l = has_color(px, 192, 240, 0, 96, &PALETTE_BUGS[COL_HERO_SKIN]);
+            int r = has_color(px, 192, 240, 96, 192, &PALETTE_BUGS[COL_HERO_SKIN]);
+            if (l) seen_left = 1;
+            if (r) seen_right = 1;
+            if (l && r) both_at_once = 1;
+        }
+    }
+    CHECK(!both_at_once);
+    CHECK(seen_right);
+    (void)seen_left;
+
     /* re-init resets the scene without leaking state */
     CHECK_EQ(sim_init(99u, 96, 200, 100), 0);
     CHECK_EQ(sim_framebuffer_len(), 2 * 96 * 200 * 4);
