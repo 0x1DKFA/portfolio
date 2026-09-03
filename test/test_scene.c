@@ -163,4 +163,18 @@ void test_scene(void) {
     for (int i = 0; i < 6; i++) world_spawn_bug(&w, SIDE_RIGHT);
     steps(60);
     CHECK_EQ(sc.current, VIG_RACE);
+
+    /* scene_reset ends a live linked vignette cleanly: exit hook runs, END fires, and patrol resumes */
+    fresh(8u);
+    scene_request(&sc, VIG_RACE);
+    steps(1);
+    CHECK_EQ(sc.current, VIG_RACE);
+    while (events_pop(&ev)) {}
+    scene_reset(&sc);
+    CHECK_EQ(sc.current, VIG_PATROL);
+    CHECK_EQ(sc.pending, -1);
+    CHECK_EQ(exits[1], 1);
+    e = events_pop(&ev);
+    CHECK_EQ(event_type(e), EV_VIGNETTE_END); CHECK_EQ(event_a(e), VIG_RACE);
+    CHECK_EQ(events_count(&ev), 0);
 }

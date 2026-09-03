@@ -85,7 +85,7 @@ SIM_EXPORT("sim_render_static")
 void sim_render_static(void) {
     if (!g_ready) return;
     World *w = &g_world;
-    scene_init(&g_scene, w, VIGNETTES);   /* back to a clean, undimmed patrol state before the preview draw */
+    scene_reset(&g_scene);   /* end/exit whatever vignette was live, then a clean, undimmed patrol state before the preview draw */
     for (int i = 0; i < MAX_BUGS; i++) w->bugs[i].state = BUG_DEAD;
     for (int i = 0; i < MAX_FX; i++) w->fx[i].active = 0;
     int mid = (w->floor_top + w->floor_bottom) / 2;

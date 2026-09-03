@@ -80,6 +80,9 @@ void test_sim(void) {
 
     /* static frame: hero mid-bonk on the left, bugs on both sides */
     sim_render_static();
+    e = sim_poll_event();
+    CHECK_EQ(event_type(e), EV_VIGNETTE_END); CHECK_EQ(event_a(e), 2);
+    CHECK_EQ(sim_poll_event(), 0u);
     px = sim_framebuffer();
     CHECK(has_color(px, 192, 240, 0, 96, &PALETTE_BUGS[COL_HERO_SKIN]));
     CHECK(has_color(px, 192, 240, 0, 96, &PALETTE_BUGS[COL_HAMMER]));

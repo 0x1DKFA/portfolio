@@ -17,6 +17,7 @@ typedef struct {
 } Scene;
 
 void scene_init(Scene *sc, World *w, const Vignette *const *table);
+void scene_reset(Scene *sc);   /* leaves the current vignette (END event if linked, exit hook), clears any pending request, and enters patrol */
 void scene_request(Scene *sc, int id);
 void scene_step(Scene *sc, float dt);
 void scene_draw_back(Scene *sc, Framebuffer *fb, const Color *pal);

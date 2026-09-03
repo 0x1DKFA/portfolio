@@ -21,6 +21,12 @@ void scene_init(Scene *sc, World *w, const Vignette *const *table) {
     enter(sc, VIG_PATROL, 0);
 }
 
+void scene_reset(Scene *sc) {
+    leave(sc);
+    sc->pending = -1; sc->pending_auto = 0;
+    enter(sc, VIG_PATROL, 0);
+}
+
 void scene_request(Scene *sc, int id) {
     if (!vignette_is_linked(id)) return;
     sc->idle_timer = 0.0f;
