@@ -16,6 +16,7 @@ void test_patrol(void);
 void test_scene(void);
 void test_crossover(void);
 void test_race(void);
+void test_detective(void);
 
 int main(void) {
     RUN(test_harness);
@@ -32,6 +33,7 @@ int main(void) {
     RUN(test_scene);
     RUN(test_crossover);
     RUN(test_race);
+    RUN(test_detective);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
