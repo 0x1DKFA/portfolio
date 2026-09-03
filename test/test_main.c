@@ -18,6 +18,7 @@ void test_sprites(void);
 void test_raycast(void);
 void test_hud(void);
 void test_actors(void);
+void test_hunt(void);
 
 int main(void) {
     RUN(test_harness);
@@ -36,6 +37,7 @@ int main(void) {
     RUN(test_raycast);
     RUN(test_hud);
     RUN(test_actors);
+    RUN(test_hunt);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
