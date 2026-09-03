@@ -17,6 +17,7 @@ void test_scene(void);
 void test_crossover(void);
 void test_race(void);
 void test_detective(void);
+void test_regression(void);
 
 int main(void) {
     RUN(test_harness);
@@ -34,6 +35,7 @@ int main(void) {
     RUN(test_crossover);
     RUN(test_race);
     RUN(test_detective);
+    RUN(test_regression);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
