@@ -96,6 +96,8 @@ h1 { margin: 0; font-size: 2rem; line-height: 1.2; }
 
 .below { max-width: 60rem; margin: 0 auto; padding: 3rem 2.5rem; }
 
+body.no-sim .panel { background: var(--bg); }   /* set by shim.js when the simulation cannot start */
+
 @media (max-width: 1023.98px) {
   .stage { grid-template-columns: 1fr; min-height: auto; }
   .panel { display: none; }
