@@ -33,6 +33,8 @@ function fail(err) {
   document.body.classList.add('no-sim');
 }
 
+const guard = (fn) => (...args) => { try { return fn(...args); } catch (err) { fail(err); } };
+
 function seed() { return (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0; }
 
 // ---- geometry -------------------------------------------------------------
@@ -127,9 +129,9 @@ function wireCards() {
     const id = VIG[card.dataset.vignette];
     if (!id) continue;
     let timer = 0;
-    card.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(() => sim.sim_request(id), HOVER_MS); });
+    card.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(guard(() => sim.sim_request(id)), HOVER_MS); });
     card.addEventListener('pointerleave', () => clearTimeout(timer));   // cancels the intent only, never the vignette
-    card.addEventListener('focusin', () => sim.sim_request(id));
+    card.addEventListener('focusin', guard(() => sim.sim_request(id)));
   }
 }
 
@@ -145,13 +147,14 @@ async function main() {
   sim = await loadWasm();
   wireCards();
   applyMode();
-  desktop.addEventListener('change', applyMode);
-  reduced.addEventListener('change', applyMode);
-  new ResizeObserver(() => { if (panels && desktop.matches) resizePanels(); }).observe($('#panel-left'));
-  document.addEventListener('visibilitychange', () => {
+  const applyModeSafe = guard(applyMode);
+  desktop.addEventListener('change', applyModeSafe);
+  reduced.addEventListener('change', applyModeSafe);
+  new ResizeObserver(guard(() => { if (panels && desktop.matches) resizePanels(); })).observe($('#panel-left'));
+  document.addEventListener('visibilitychange', guard(() => {
     if (document.hidden) stopLoop();
     else if (panels && !staticMode()) startLoop();
-  });
+  }));
 }
 
 main().catch(fail);
