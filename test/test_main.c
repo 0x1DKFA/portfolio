@@ -12,6 +12,7 @@ void test_hero(void);
 void test_world(void);
 void test_sprites(void);
 void test_stage(void);
+void test_patrol(void);
 
 int main(void) {
     RUN(test_harness);
@@ -24,6 +25,7 @@ int main(void) {
     RUN(test_world);
     RUN(test_sprites);
     RUN(test_stage);
+    RUN(test_patrol);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
