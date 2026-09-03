@@ -1,5 +1,9 @@
 // shim.js — the only code on the page that touches the DOM.
 // The simulation lives in sim.wasm; everything crossing the boundary is an integer or a pointer.
+//
+// Debug query params:
+//   ?vignette=race|detective|regression   force-request a vignette on load
+//   ?motion=reduce                        force the static (no-animation) render path
 
 const PANEL_W = 96, PANEL_H_MIN = 64, PANEL_H_MAX = 320, HOVER_MS = 150;
 const VIG = { race: 1, detective: 2, regression: 3 };
@@ -15,7 +19,7 @@ const cards = [...document.querySelectorAll('.case-file[data-vignette]')];
 
 let sim = null;     // wasm exports
 let panels = null;  // { left, right, off, backingW, backingH, scale, panelH, gapW }
-let raf = 0, last = 0, squashed = 0;
+let raf = 0, last = 0, squashed = 0, resizeTimer = 0;
 
 async function loadWasm() {
   const url = new URL('sim.wasm', import.meta.url);
@@ -115,7 +119,7 @@ function frame(now) {
 function startLoop() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
 function stopLoop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
 
-function renderStatic() { sim.sim_render_static(); blit(); }
+function renderStatic() { sim.sim_render_static(); blit(); drainEvents(); }
 
 function renderAvatar() {
   sim.sim_render_avatar();
@@ -150,7 +154,10 @@ async function main() {
   const applyModeSafe = guard(applyMode);
   desktop.addEventListener('change', applyModeSafe);
   reduced.addEventListener('change', applyModeSafe);
-  new ResizeObserver(guard(() => { if (panels && desktop.matches) resizePanels(); })).observe($('#panel-left'));
+  new ResizeObserver(() => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(guard(() => { if (panels && desktop.matches) resizePanels(); }), 200);
+  }).observe($('#panel-left'));
   document.addEventListener('visibilitychange', guard(() => {
     if (document.hidden) stopLoop();
     else if (panels && !staticMode()) startLoop();
