@@ -8,6 +8,7 @@
 
 const char *font_glyph(char c);                  /* 15 chars or NULL */
 void draw_text(Framebuffer *fb, int x, int y, const char *s, Color c);
+void draw_text_scaled(Framebuffer *fb, int x, int y, const char *s, int scale, Color c);   /* advance 4*scale */
 int  draw_text_width(const char *s);
 
 #endif

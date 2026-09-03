@@ -40,4 +40,16 @@ void test_font(void) {
     draw_clear(&fb, COLOR(0, 0, 0));
     draw_text(&fb, 30, 0, "8", COLOR(255, 255, 255));
     CHECK(lit(&fb, 31, 0));
+
+    /* full alphabet and scaled text */
+    CHECK(font_glyph('R') != NULL); CHECK(font_glyph('H') != NULL); CHECK(font_glyph('I') != NULL);
+    CHECK(font_glyph('A') != NULL); CHECK(font_glyph('Z') != NULL); CHECK(font_glyph('q') != NULL);
+    draw_clear(&fb, COLOR(0, 0, 0));
+    draw_text_scaled(&fb, 0, 0, "1", 2, COLOR(255, 255, 255));
+    CHECK(lit(&fb, 2, 0)); CHECK(lit(&fb, 3, 0)); CHECK(lit(&fb, 2, 1)); CHECK(lit(&fb, 3, 1));
+    CHECK(!lit(&fb, 0, 0)); CHECK(!lit(&fb, 4, 0));
+    CHECK(lit(&fb, 0, 2)); CHECK(lit(&fb, 3, 3)); CHECK(!lit(&fb, 4, 2));   /* row 1 "## " scaled to rows 2-3, cols 0-3 (the test buffer is 8 rows tall) */
+    draw_clear(&fb, COLOR(0, 0, 0));
+    draw_text_scaled(&fb, 0, 0, "11", 2, COLOR(255, 255, 255));
+    CHECK(lit(&fb, 10, 0));                                     /* second glyph starts at x = 8 */
 }

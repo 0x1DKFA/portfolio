@@ -31,6 +31,19 @@ static const Glyph GLYPHS[] = {
     { 'U', "# #" "# #" "# #" "# #" "###" },
     { 'V', "# #" "# #" "# #" "# #" " # " },
     { 'X', "# #" "# #" " # " "# #" "# #" },
+    { 'A', "###" "# #" "###" "# #" "# #" },
+    { 'B', "## " "# #" "## " "# #" "## " },
+    { 'F', "###" "#  " "###" "#  " "#  " },
+    { 'G', "###" "#  " "# #" "# #" "###" },
+    { 'H', "# #" "# #" "###" "# #" "# #" },
+    { 'I', "###" " # " " # " " # " "###" },
+    { 'J', "  #" "  #" "  #" "# #" "###" },
+    { 'P', "###" "# #" "###" "#  " "#  " },
+    { 'Q', "###" "# #" "# #" "###" "  #" },
+    { 'R', "###" "# #" "## " "# #" "# #" },
+    { 'S', "###" "#  " "###" "  #" "###" },
+    { 'Y', "# #" "# #" "###" " # " " # " },
+    { 'Z', "###" "  #" " # " "#  " "###" },
 };
 
 static const char BOX[] = "###" "# #" "# #" "# #" "###";
@@ -55,5 +68,16 @@ void draw_text(Framebuffer *fb, int x, int y, const char *s, Color c) {
         for (int row = 0; row < FONT_H; row++)
             for (int col = 0; col < FONT_W; col++)
                 if (g[row * FONT_W + col] == '#') draw_pixel(fb, x + col, y + row, c);
+    }
+}
+
+void draw_text_scaled(Framebuffer *fb, int x, int y, const char *s, int scale, Color c) {
+    if (scale < 1) scale = 1;
+    for (; *s; s++, x += FONT_ADVANCE * scale) {
+        const char *g = font_glyph(*s);
+        if (!g) g = BOX;
+        for (int row = 0; row < FONT_H; row++)
+            for (int col = 0; col < FONT_W; col++)
+                if (g[row * FONT_W + col] == '#') draw_rect(fb, x + col * scale, y + row * scale, scale, scale, c);
     }
 }
