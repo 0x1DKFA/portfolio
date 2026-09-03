@@ -13,6 +13,7 @@ void test_palette(void);
 void test_map(void);
 void test_textures(void);
 void test_camera(void);
+void test_decals(void);
 
 int main(void) {
     RUN(test_harness);
@@ -26,6 +27,7 @@ int main(void) {
     RUN(test_map);
     RUN(test_textures);
     RUN(test_camera);
+    RUN(test_decals);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
