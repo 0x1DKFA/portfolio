@@ -9,7 +9,7 @@ TEST_HDR := $(wildcard test/*.h)
 
 # -Isim: sources under sim/vignettes/ include "world.h" and "vignettes/x.h" relative to sim/
 WASM_FLAGS := $(WASM_TARGET) -std=c11 -nostdlib -ffreestanding -fno-builtin -fvisibility=hidden \
-              -mbulk-memory -O2 -Wall -Wextra -Isim -Wl,--no-entry
+              -mbulk-memory -O2 -g0 -Wall -Wextra -Isim -Wl,--no-entry
 TEST_FLAGS := -std=c11 -O0 -g -Wall -Wextra -fsanitize=address,undefined \
               -fno-omit-frame-pointer -Isim -Itest
 
