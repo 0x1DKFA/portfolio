@@ -138,7 +138,10 @@ Expected: `... checks, 0 failures` with zero warnings (about 2240 checks: harnes
 
 - [ ] **Step 6: Commit**
 
+`make clean` deletes the committed `sim.wasm`; restore it before staging so the phase 1 module keeps serving the page until Task 13 rebuilds it.
+
 ```bash
+git checkout -- sim.wasm
 git add -A
 git commit -m "Remove the side-panel world, vignettes, and scene ahead of the alley hunt"
 ```
