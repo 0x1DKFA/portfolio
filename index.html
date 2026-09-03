@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rohit Kumar</title>
+  <meta name="description" content="Rohit Kumar, software engineer. Race conditions fixed, heisenbugs found, regressions prevented.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="stage">
+    <canvas id="panel-left" class="panel" aria-hidden="true" role="presentation"></canvas>
+
+    <section id="hero" class="hero">
+      <canvas id="avatar" class="avatar" width="24" height="24" aria-hidden="true" role="presentation"></canvas>
+      <header>
+        <h1>Rohit Kumar</h1>
+        <p class="title">[Title line: role, years, the stack you want to be hired for]</p>
+        <p class="pitch">[One sentence. Example tone: I fix the bugs that only happen in production, for one customer, on Fridays.]</p>
+      </header>
+
+      <ul class="case-files" aria-label="Case files">
+        <li>
+          <article class="case-file" data-vignette="race" tabindex="0">
+            <span class="tag">Race condition</span>
+            <p class="symptom">[Symptom: what users saw, one line]</p>
+            <p class="fix">[Fix: what you changed, one line]</p>
+          </article>
+        </li>
+        <li>
+          <article class="case-file" data-vignette="detective" tabindex="0">
+            <span class="tag">Heisenbug</span>
+            <p class="symptom">[Symptom: the bug that disappeared under observation]</p>
+            <p class="fix">[Fix: how you tracked it down]</p>
+          </article>
+        </li>
+        <li>
+          <article class="case-file" data-vignette="regression" tabindex="0">
+            <span class="tag">Regression</span>
+            <p class="symptom">[Symptom: the bug that kept coming back]</p>
+            <p class="fix">[Fix: the test or guard that made it stay fixed]</p>
+          </article>
+        </li>
+      </ul>
+
+      <nav class="contact" aria-label="Contact">
+        <a href="mailto:[you@example.com]">Email</a>
+        <a href="https://github.com/[handle]" rel="me">GitHub</a>
+        <a href="resume.pdf">Resume</a>
+      </nav>
+
+      <p class="counter">bugs squashed this visit: <span id="squashed">0</span></p>
+      <p class="credit">Side panels: C compiled to WebAssembly, no framework. <a href="https://github.com/[handle]/[repo]">Source</a></p>
+    </section>
+
+    <canvas id="panel-right" class="panel" aria-hidden="true" role="presentation"></canvas>
+  </main>
+
+  <section class="below" id="more">
+    <h2>More</h2>
+    <p>[Experience and skills go here later.]</p>
+  </section>
+
+  <script type="module" src="shim.js"></script>
+</body>
+</html>
