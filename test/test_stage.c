@@ -1,6 +1,7 @@
 #include "test.h"
 #include "stage.h"
-#include "palette.h"
+
+static const Color TEST_PAL[1] = { { 0, 0, 0, 255 } };
 
 static int steps, renders;
 static float last_dt;
@@ -11,9 +12,9 @@ static uint8_t px[8 * 8 * 4];
 void test_stage(void) {
     Stage st;
     int marker = 7;
-    stage_init(&st, px, 8, 8, PALETTE_BUGS, step_fn, render_fn, &marker);
+    stage_init(&st, px, 8, 8, TEST_PAL, step_fn, render_fn, &marker);
     CHECK_EQ(st.fb.w, 8);
-    CHECK(st.palette == PALETTE_BUGS);
+    CHECK(st.palette == TEST_PAL);
     CHECK(*(int *)st.state == 7);
 
     steps = 0;

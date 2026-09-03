@@ -2,8 +2,8 @@ WASM_CC     ?= zig cc
 WASM_TARGET ?= -target wasm32-freestanding
 CC          ?= cc
 
-SIM_SRC  := $(wildcard sim/*.c sim/vignettes/*.c)
-SIM_HDR  := $(wildcard sim/*.h sim/vignettes/*.h)
+SIM_SRC  := $(wildcard sim/*.c sim/vignettes/*.c sim/actors/*.c)
+SIM_HDR  := $(wildcard sim/*.h sim/vignettes/*.h sim/actors/*.h)
 TEST_SRC := $(wildcard test/*.c)
 TEST_HDR := $(wildcard test/*.h)
 
