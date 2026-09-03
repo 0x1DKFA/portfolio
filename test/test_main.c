@@ -10,6 +10,7 @@ void test_font(void);
 void test_stage(void);
 void test_trig(void);
 void test_palette(void);
+void test_map(void);
 
 int main(void) {
     RUN(test_harness);
@@ -20,6 +21,7 @@ int main(void) {
     RUN(test_stage);
     RUN(test_trig);
     RUN(test_palette);
+    RUN(test_map);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
