@@ -44,6 +44,7 @@ void test_font(void) {
     /* full alphabet and scaled text */
     CHECK(font_glyph('R') != NULL); CHECK(font_glyph('H') != NULL); CHECK(font_glyph('I') != NULL);
     CHECK(font_glyph('A') != NULL); CHECK(font_glyph('Z') != NULL); CHECK(font_glyph('q') != NULL);
+    CHECK(font_glyph('W') != NULL); CHECK(font_glyph('w') == font_glyph('W'));
     draw_clear(&fb, COLOR(0, 0, 0));
     draw_text_scaled(&fb, 0, 0, "1", 2, COLOR(255, 255, 255));
     CHECK(lit(&fb, 2, 0)); CHECK(lit(&fb, 3, 0)); CHECK(lit(&fb, 2, 1)); CHECK(lit(&fb, 3, 1));
