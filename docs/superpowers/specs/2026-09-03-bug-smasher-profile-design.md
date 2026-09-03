@@ -1,141 +1,132 @@
 # Bug Smasher Profile — Design Spec
 
 - **Date:** 2026-09-03
-- **Status:** Approved design, ready for implementation planning
+- **Status:** Approved design, revision 4, ready for implementation planning
 - **Owner:** Rohit Kumar
-- **Revision:** 3.1 — wording amendments after the phase 1 implementation (budgets, latency, resize, debug hooks)
+- **Revision:** 4 — the first screen is redesigned as a first-person alley hunt (a Doom-style raycaster) behind a compact card; the side panels, vignettes, and hover linking from revisions 1 to 3.1 are removed. Section 7 (settlement stage) is unchanged in intent.
 
 ## 1. Purpose and audience
 
-A single-page personal profile aimed primarily at recruiters and hiring managers. The page must deliver name, pitch, and contact within seconds, while pixel-art side animations show, rather than claim, the author's debugging strengths: fixing race conditions, hunting hard-to-reproduce bugs, and preventing regressions.
+A single-page personal profile aimed primarily at recruiters and hiring managers. The page must deliver name, pitch, and contact within seconds. Behind the card, a single ambient animation shows the author's debugging character: a first-person walk through the back alleys of a night-time city, following a trail of glowing footprints to a hidden bug, smashing it with a toy hammer, and starting again. It shows, rather than claims, patience and method in finding bugs.
 
-Below the fold, a second animated stage shows a different strength: leading greenfield projects from nothing to a thriving state. The character arrives on barren land, digs a well, lays foundations, ships a first hut, brings in a team, and directs the growth of a settlement around an oasis. Each landmark maps to a real project.
+Below the fold, a second animated stage (phase 2) shows a different strength: leading greenfield projects from nothing to a thriving state. See section 7.
 
-A secondary goal is a credibility signal for technical hiring managers: the animation engine is written in C and compiled to WebAssembly with no framework, and the page says so with a link to the source.
+A secondary goal is a credibility signal for technical hiring managers: the animation engine is written in C and compiled to WebAssembly with no framework and no art assets, and the page says so with a link to the source.
 
 ### Delivery phases
 
-- **Phase 1:** the first screen (sections 2 to 6 and 8) and the engine with its stage abstraction in place.
-- **Phase 2:** the greenfield settlement stage (section 7) as a second stage added to the same module.
-
-Phase 1 ships on its own. The stage abstraction is built in phase 1 so that phase 2 adds a stage rather than restructuring the engine.
-
-Success looks like: a recruiter lands on the page, reads the pitch and case files without distraction, notices the side animation acting out the case file they are looking at, and finds the contact links immediately. On a phone they get the same information with no animation.
+- **Phase 1 (done, superseded):** two side panels with hover-linked vignettes. Its engine core (drawing primitives, font, RNG, events, stage abstraction, build, tests) carries forward.
+- **Phase 1b (this revision):** the first-person alley hunt as the only first-screen animation; removal of the side panels, vignettes, and hover linking.
+- **Phase 2:** the settlement stage (section 7), added as a second stage to the same module.
 
 ## 2. Layout
 
 ### Desktop (viewport width 1024px and above)
 
-Three-column CSS grid, `grid-template-columns: 1fr 2fr 1fr`, filling the viewport height. The first screen does not need to scroll.
-
-- **Left and right columns:** one `<canvas>` each, showing the two halves of a single simulated world (see section 5).
-- **Middle column:** the hero card, a solid surface on top of the world. The character can walk *behind* it: it disappears at one panel's inner edge and reappears at the other's after a delay proportional to the card's width.
+- **Scene canvas.** One `<canvas>` fixed to the viewport behind everything, rendering the first-person view at an integer scale that covers the viewport (at most one scale unit of overflow, cropped; no letterbox).
+- **Hero card.** A compact panel floating over the scene, left-aligned: width `clamp(320px, 34vw, 520px)`, a 5vw left margin, vertically centred with a minimum 6vh margin, dark and nearly opaque (about 92% alpha) with a soft shadow so text stays readable over motion. The right two thirds of the screen show the alley, its centre, and the hammer.
+- **Below the fold.** The settlement section (section 7) and a plain placeholder section follow the first screen. They have an opaque background so the fixed canvas never shows through behind text.
 
 ### Mobile (below 1024px)
 
-Single column containing only the hero card. No animation loop runs. A single static pixel-art frame of the character mid-bonk is shown above the name as an avatar, rendered once by the same C code into a small canvas (section 10, static mode).
+Single column: the card takes the full width with margins. The scene canvas renders **one static frame** of the alley as a still backdrop and never loops. There is no separate avatar.
 
-Switching between the two layouts (for example a window resize across 1024px) creates or tears down the panels at runtime via `matchMedia`.
+Switching between layouts at runtime (a resize across 1024px) re-evaluates the mode via `matchMedia`.
 
 ## 3. Hero card content
 
 Top to bottom:
 
-1. **Identity:** name, a one-line title, and a one-sentence pitch. Copy is author-supplied. Example pitch, for tone only: "I fix the bugs that only happen in production, for one customer, on Fridays."
-2. **Three case files.** Each is a focusable `<article class="case-file" data-vignette="...">` containing a tag, a one-line symptom, a one-line fix, and an optional link to a longer write-up. The three tags and their linked vignettes:
-   - `Race condition` → `race`
-   - `Heisenbug` → `detective`
-   - `Regression` → `regression`
+1. **Identity:** name, a one-line title, and a one-sentence pitch. Copy is author-supplied.
+2. **Three case files**, plain text: a tag (Race condition, Heisenbug, Regression), a one-line symptom, a one-line fix, an optional link. They no longer trigger anything and are not focusable.
 3. **Contact row:** email, GitHub, resume PDF. No LinkedIn.
-4. **Live counter** in a corner of the card: "bugs squashed this visit: N". Increments from simulation events. In-memory only, resets each visit.
-5. **Engine credit**, one small line at the bottom of the card: side panels are C compiled to WebAssembly, no framework, with a link to the source repository.
-
-Below the fold comes the greenfield settlement section (section 7), then a plain HTML placeholder section for anything else such as experience or a skills list, which is out of scope for version one.
+4. **Live counter:** "bugs squashed this visit: N", incremented on each smash. In-memory only.
+5. **Engine credit**, one small line: the background is C compiled to WebAssembly, no framework, no art assets, with a link to the source repository.
 
 ## 4. Visual style
 
-- Pixel art, retro-arcade tone. Version one uses **code-drawn placeholders**: filled rectangles on a logical pixel grid. Real sprite artwork can replace them later through `sprites.c` alone (section 9).
-- Dark navy background, a very faint grid, a ground line at roughly 85% of panel height.
-- Palette of five or six muted colours so the panels sit visually behind the card.
-- **Bugs:** round, cute, two antennae, stub legs, three colour variants. Never realistic. Roughly 10×8 logical px.
-- **Character:** small pixel person with a bright toy hammer. Roughly 14×20 logical px. Gains a deerstalker hat and magnifying glass in the detective vignette.
-- **Squash effect:** pixel dust puff (about 0.4s) and a small floating "+1".
-- **Text in the world** (the `count` label, "+1") uses a 3×5 bitmap font drawn by the C renderer.
+- **First person at Doom's resolution.** About 200 logical pixels tall, width following the viewport aspect, chunky integer-scaled pixels. Walls are texture-mapped, the floor is flat, the sky is a skyline strip, sprites face the camera.
+- **Windy night.** Dark blue-black sky with skyscraper silhouettes and lit windows. Brick and concrete alley walls with grime, drainpipes, posters, lit windows in two or three colours (a few flicker), one neon sign with the author's first name and one generic sign. Street lamps brighten pools of floor. Distance fog darkens everything as it recedes.
+- **Palette.** About sixteen colours generated with the textures: asphalt greys, brick reds, concrete, window ambers and cyans, neon magenta, puddle blue, footprint yellow, hammer yellow, dog browns.
+- **Everything is procedural.** Textures, sprites, the skyline, and the HUD are generated at init from code and the seed. No image assets are loaded.
+- **Bugs and dogs are cute.** Round cartoon bug with two antennae; friendly pixel dogs with wagging tails. Never realistic.
 
-## 5. World rules
+## 5. World: the map
 
-- **Single world, two views.** World x-coordinates run continuously across left panel, hero gap, and right panel. The renderer produces both panel views into one framebuffer.
-- **Logical resolution.** Each panel is 96 logical px wide. Logical height is derived from the panel's aspect ratio, capped at 320. The hero gap's logical width is derived from the card's CSS width at the same scale.
-- **Integer scaling** happens in the browser shim: `scale = floor(canvasBackingWidth / 96)`. The logical framebuffer is blitted up with `imageSmoothingEnabled = false`. Any remainder is letterboxed with the background colour.
-- **Ambient rule.** The character is never on both sides at once: it is on one side, or behind the hero card during a crossover. The unattended side still has slowly crawling bugs. Motion everywhere, action in one place.
-- **Bug cap:** 20 per side.
-- **Character walk speed:** about 24 logical px per second.
+- A **48 × 48 tile map** written as an ASCII block in C, parsed at init. Legend:
 
-## 6. Vignettes
+  | Char | Meaning |
+  |---|---|
+  | `#` | brick wall |
+  | `=` | concrete wall |
+  | `W` | window wall (lit and unlit panes decided by a hash of the tile) |
+  | `N` | neon sign wall (the author's first name) |
+  | `S` | generic sign wall (`OPEN`) |
+  | `P` | poster wall |
+  | `D` | dumpster (a wall tile with its own texture; bugs may hide beside it) |
+  | `.` | alley floor (asphalt) |
+  | `~` | puddle floor |
+  | `L` | floor with a street lamp sprite; lights tiles within radius 3 |
+  | `T` | floor with a trash can sprite; bugs may hide beside it |
+  | `c` | floor with a loose paper sprite |
+  | `n` | floor with a newspaper sprite |
+  | `d` | floor, dog spawn |
+  | `@` | floor, camera start |
 
-Every vignette implements the same interface (section 9). Durations are targets, not hard limits. A **beat boundary** is a moment where interrupting looks intentional rather than broken.
+- **Walkable** tiles are all floor kinds. Alleys are one or two tiles wide and form loops with a few dead ends so trails vary.
+- **Light map.** Each floor tile has a light level 0 to 1: ambient 0.25 plus lamp contributions falling off linearly to radius 3. Walls take the light of the floor tile the ray hit from.
+- **Hiding spots** are floor tiles adjacent to a `T` or `D`.
+- The map is authored so that every floor tile can reach every other (one connected component); a test asserts it.
 
-### 6.1 Patrol (default state)
+## 6. The hunt loop
 
-- Bugs spawn from panel edges every 4–8 seconds per side up to the cap and wander with seeded randomness.
-- The character walks to the nearest bug, winds up, bonks it. Cadence: one squash every 3–5 seconds.
-- Never finishes on its own; it is the state every other vignette returns to.
-- Beat boundaries: whenever the character is not mid-swing.
+### 6.1 Camera
 
-### 6.2 Race condition (`race`, ~10s)
+Position in tile units, view angle in radians, field of view 85 degrees, eye height 0.5 of a 2.5-tile wall. Walking speed 1.4 tiles per second, turn rate 2.5 radians per second toward the target angle by the shortest arc. Head bob: the horizon and the HUD shift vertically by up to 3 logical pixels with the step phase while walking. The horizon row also shifts for the inspect dip (down 12 px over 0.6 s) and the celebrate hop (up 8 px and back over 0.5 s).
 
-Phases, in order:
+### 6.2 States
 
-1. **Setup (1s):** a shared box labelled `count` appears mid-panel.
-2. **Rush (1.5s):** two bugs sprint toward the box from opposite sides.
-3. **Collide and glitch (2s):** the bugs collide at the box; the box flickers between values, turns red, jitters.
-4. **Lock (2s):** the character walks up and drops a padlock on the box.
-5. **Queue (3s):** three bugs approach one at a time, each waits for the previous to finish, each update is clean.
-6. **Resolved (0.5s):** the box turns green; the character wipes their brow (optional pose; the placeholder art omits it).
+| State | Duration | Behaviour |
+|---|---|---|
+| LOOK | 1.5 s | Standing at the trail start, the view pans 20 degrees left, then right, then settles toward the first waypoint. |
+| FOLLOW | path length / speed | Walk the footprint trail waypoint to waypoint; turn smoothly at corners; every 8 ± 3 s pause 0.6 s to dip and inspect a print. |
+| APPROACH | until in range | Within 2.5 tiles of the hiding spot the bug peeks out; the target angle becomes the bug's bearing; keep walking until within 1.0 tile and facing within 0.2 rad. |
+| SMASH | 0.4 s | Hammer swing; at 0.25 s the hit lands: dust puff sprite at the bug, bug removed, `+1` flash for 0.8 s, `BUG_SQUASHED` event. |
+| CELEBRATE | 1.0 s | A small hop. |
+| NEW_TRAIL | instant | Pick a hiding spot at least 12 BFS steps away; lay a new trail; back to LOOK. |
 
-Beat boundaries: between phases. Done after phase 6; props are removed on exit.
+A full cycle takes 30 to 60 s. Given a seed, the whole run is deterministic.
 
-### 6.3 Detective / Heisenbug (`detective`, ~12s)
+### 6.3 Trail and footprints
 
-1. **Dim (0.5s):** the panel darkens.
-2. **Footprints (3s):** an invisible bug leaves five footprints, one every 0.6s, across the ground.
-3. **Gear up (1s):** the character puts on a deerstalker and raises a magnifying glass.
-4. **Follow (3s):** the character walks the trail; footprints glow only inside the glass circle.
-5. **Reveal (1.5s):** the trail ends at a hiding spot. The bug is visible only while the glass is over it.
-6. **Bonk (0.5s)** and **undim (0.5s)**, with slack to reach roughly 12s.
+- The trail is the breadth-first-search path over floor tiles from the current tile to the hiding spot, as a list of tile centres.
+- **Footprint decals** are laid in pairs every 0.5 tile along the polyline, oriented along the segment, alternating left and right of the centre line by 0.15 tile. They live in a decal grid (at most two decals per tile) sampled by the floor caster.
+- **Glow** is brightest for the eight pairs ahead of the camera along the trail and fades to a dim amber behind; prints behind the camera are removed once more than six tiles back.
 
-Beat boundaries: after each footprint in phase 2, after phase 4, after phase 6. Done after undim.
+### 6.4 Dogs
 
-### 6.4 Regression (`regression`, ~8s)
+Two or three dog sprites spawned at `d` tiles. Each wanders: choose a random open neighbour tile weighted to keep direction, walk at 1.0 tile per second, reverse at dead ends. Near a footprint or trash can it may pause 1 to 2 s in a sniff pose. Dogs never block the camera or each other; they are drawn, not collided with.
 
-1. **Bonk, two appear (1.5s).**
-2. **Bonk, four appear (1.5s).**
-3. **Pause and think (1s):** the character stops.
-4. **Plant shield (1s):** a small shield with a checkmark is placed on the ground.
-5. **Bounce (2s):** the next respawn hits the shield and dissipates.
-6. **Clear (1s):** remaining bugs are squashed or dissipate.
+### 6.5 Trash and wind
 
-Beat boundaries: after each bonk, after the shield is planted. Done after clear.
+Loose items (`c`, `n`) carry a velocity. A **gust** occurs every 4 to 10 s: for 1.2 s it pushes each loose item along its alley's open axis at up to 2 tiles per second, choosing the direction randomly per gust. Friction decays velocity to zero within a second after the gust; walls stop items. A tumble frame plays while moving. Trash cans, dumpsters, and lamps do not move.
 
-### 6.5 Crossover (transitional)
+### 6.6 The bug
 
-The character walks to the inner edge of the current panel, disappears behind the hero card, and emerges at the inner edge of the other panel. Traversal time is `gapLogicalWidth / walkSpeed`.
-
-- **Triggers:** the far side has at least 6 more bugs than the current side, or 120 seconds have passed since the last crossover. Never triggered while a linked vignette is playing.
-- **Uninterruptible** while the character is behind the card. Any pending request waits and plays on the new side.
+One hidden bug per cycle at the hiding spot, drawn as a sprite half-hidden beside its trash can or dumpster. Frames: hidden, peek, exposed. It becomes `peek` during APPROACH and `exposed` when the camera is within 1.5 tiles.
 
 ## 7. Greenfield settlement stage (phase 2)
 
-Shows that the author starts things and leads them, not only fixes them. It is a second **stage** in the same engine with its own framebuffer, palette, sequencer, content, and hover linking. It reuses the engine's drawing primitives, event queue, and character.
+Shows that the author starts things and leads them, not only fixes them. It is a second **stage** in the same engine with its own framebuffer, palette, sequencer, content, and hover linking. It reuses the engine's drawing primitives, event queue, and RNG. It is unchanged from revision 3 except where noted.
 
 ### 7.1 Placement and layout
 
-- A below-the-fold section titled in the spirit of "Built from scratch", directly under the first screen.
-- One landscape `<canvas>` spanning the section width. Fixed logical size **320×80**, integer-scaled by width (`scale = floor(canvasBackingWidth / 320)`), letterboxed vertically. Decorative and hidden from assistive tech like the side panels.
+- A below-the-fold section titled in the spirit of "Built from scratch", directly under the first screen, with an opaque background.
+- One landscape `<canvas>` spanning the section width. Fixed logical size **320×80**, integer-scaled by width (`scale = floor(canvasBackingWidth / 320)`), letterboxed vertically. Decorative and hidden from assistive tech.
 - Beneath the canvas, two to five **project cards**, `<article class="project" data-building="k" data-kind="watchtower">`, each with a project name, one line on what it was, one line on the outcome, and the author's role. Each card corresponds to one building. Copy is author-supplied.
 - A small pixel **shovel button** in the section corner replays the build.
-- **Palette:** sand, cracked-earth brown, teal water, palm green, terracotta, and warm lantern amber, with a deep indigo sky at dusk. Deliberately distinct from the navy side-panel palette so the section reads as a new chapter.
-- **Mobile:** the canvas shows the finished settlement as one static frame via `oasis_render_static`, and no loop runs. Cards remain ordinary text. This keeps the "no animation on mobile" rule.
+- **Palette:** sand, cracked-earth brown, teal water, palm green, terracotta, and warm lantern amber, with a deep indigo sky at dusk. Distinct from the night alley palette so the section reads as a new chapter.
+- **Mobile:** the canvas shows the finished settlement as one static frame via `oasis_render_static`, and no loop runs.
 
 ### 7.2 Build sequence
 
@@ -159,214 +150,179 @@ About 15 seconds from trigger to utopia, then an ambient loop for as long as the
 - **Start:** an `IntersectionObserver` fires when at least 30% of the section is visible and the shim calls `oasis_start`. Before that the canvas shows the Barren frame.
 - **Pause:** when the section leaves the viewport the shim stops calling `oasis_update`. On return it resumes where it left off; no reset.
 - **Replay:** the shovel button calls `oasis_replay`, which resets to Barren and starts again.
-- **Fast-forward:** focusing a building that does not exist yet during phases 1 to 6 runs the sequencer at 8× speed until that building completes, then resumes normal speed. Visitors who hover a project card mid-build never wait.
+- **Fast-forward:** focusing a building that does not exist yet during phases 1 to 6 runs the sequencer at 8× speed until that building completes, then resumes normal speed.
 
 ### 7.4 Project linking
 
-Same 150ms hover-intent rule as the case files.
+Hover intent of 150 ms.
 
-- **Card → canvas:** hover or keyboard focus on a project card calls `oasis_focus(k)`. The character walks to building k and the building glows for as long as the card is hovered or focused. Pointer leave or blur calls `oasis_focus(-1)`, which clears the glow; the character stays where it is and wanders back to the bench after 5 seconds idle.
-- **Canvas → card:** pointer movement over the canvas is converted to logical pixels and passed to `oasis_building_at(x, y)`. A hit highlights the matching card and calls `oasis_focus(k)`; the cursor becomes a pointer. Leaving the building clears both.
-- **Event:** when the character reaches the focused building the stage emits `HERO_ARRIVED(k)`, which the shim can use for a small card animation.
+- **Card → canvas:** hover or keyboard focus on a project card calls `oasis_focus(k)`. The character walks to building k and the building glows for as long as the card is hovered or focused. Pointer leave or blur calls `oasis_focus(-1)`; the character wanders back to the bench after 5 seconds idle.
+- **Canvas → card:** pointer movement over the canvas is converted to logical pixels and passed to `oasis_building_at(x, y)`. A hit highlights the matching card and calls `oasis_focus(k)`; the cursor becomes a pointer.
+- **Event:** when the character reaches the focused building the stage emits `HERO_ARRIVED(k)`.
 
 ### 7.5 Buildings, scenery, and crew
 
 - **Fixed scenery:** oasis pool at the centre, three palms, the well, the flag and sign, the `v0.1` hut, the paving grid, the bench.
-- **Project buildings** occupy fixed slots alternating left and right of the oasis, moving outward, so any number from one to six lays out sensibly. Kinds in the catalogue: `watchtower`, `market`, `waterwheel`, `granary`, `aqueduct`, `library`, `forge`. The kind comes from `data-kind`; an unknown kind falls back to `house`.
+- **Project buildings** occupy fixed slots alternating left and right of the oasis, moving outward, for one to six buildings. Kinds: `watchtower`, `market`, `waterwheel`, `granary`, `aqueduct`, `library`, `forge`; unknown falls back to `house`.
 - **Growth animation:** each building rises from foundation to roof over about 0.7s, with crew hammering at its slot.
-- **Canals:** a thin channel extends from the oasis to each building as it completes. Quiet infrastructure metaphor; no explanation on the page.
-- **Crew:** three small pixel people distinct from the character. After phase 5 they animate hammering at whichever slot is under construction, and in Ambient they walk between buildings.
-- **Milestone tags** are drawn with the same 3×5 bitmap font as the side panels.
+- **Canals:** a thin channel extends from the oasis to each building as it completes.
+- **Crew:** three small pixel people; after phase 5 they hammer at the slot under construction, and in Ambient they walk between buildings.
+- **Milestone tags** use the 3×5 bitmap font.
 
-## 8. Content linking
+## 8. Events and debug hooks
 
-- **Hover intent:** `pointerenter` on a case file starts a 150ms timer; on expiry the shim calls the simulation's `sim_request(vignetteId)`. `pointerleave` cancels the timer only. Sweeping the cursor across a card does nothing.
-- **Keyboard:** `focusin` on a case file requests immediately.
-- **Request semantics:** the simulation holds at most one pending request. A newer request replaces an older pending one. A request for the currently playing vignette is ignored. The swap happens at the current vignette's next beat boundary. From patrol that is under half a second; inside another vignette it is the time to that vignette's next boundary, up to about three seconds in the detective's FOLLOW phase.
-- **Location:** the vignette plays wherever the character is. A crossover in progress finishes first.
-- **Feedback in the card:** while a vignette plays, its case file gets a subtle glow and a small pixel play icon. Removed on the `VIGNETTE_END` event.
-- **Leaving the card does not stop the vignette.** It always plays to completion, then patrol resumes.
-- **Idle auto-play:** if no hover request has arrived for 45 seconds, the simulation picks a linked vignette at random (never the same one twice in a row), plays it, and emits `VIGNETTE_START` with the auto flag set so the shim highlights the matching card. This is the path most passive viewers will experience.
-- **Debug hooks:** a `?vignette=<name>` query parameter makes the shim call `sim_request` immediately after init, and `?motion=reduce` forces static mode, both for manual verification.
+- **Events** keep the packed integer format `(type << 24) | (stage << 16) | (a << 8) | b` on one queue read by `sim_poll_event`. The hunt stage (stage 0) emits only `BUG_SQUASHED` (type 3). The vignette START and END types are retired. Phase 2 adds the oasis events from 7.3 and 7.4.
+- **Debug hooks** are query parameters read by the shim: `?seed=N` fixes the simulation seed so a scene reproduces; `?motion=reduce` forces static mode. The `?vignette=` hook is removed.
+- There is no hover or focus linking on the first screen.
 
 ## 9. Architecture
 
 Two layers with one narrow boundary:
 
-- **Page layer:** HTML, CSS, and a single small JavaScript shim. The shim is the only code that touches the DOM, the canvases, or browser events.
-- **Simulation layer:** C, compiled to a freestanding WebAssembly module with **no imports** and no libc. It owns all state, all behaviour, all timing, and all pixel rendering into RGBA framebuffers in its own linear memory.
+- **Page layer:** HTML, CSS, and a single small JavaScript shim, the only code that touches the DOM, the canvas, or browser events.
+- **Simulation layer:** C compiled to a freestanding WebAssembly module with **no imports** and no libc. It owns all state, behaviour, timing, textures, and pixel rendering into RGBA framebuffers in its own linear memory.
 
-The simulation hosts two **stages**, each with its own framebuffer, fixed-step accumulator, palette, and state machine, sharing the drawing primitives, the seeded RNG, the event queue, and the character's sprite and movement code:
+The simulation hosts **stages**, each with its own framebuffer, fixed-step accumulator, palette, and state machine, sharing drawing primitives, RNG, event queue, and the `Stage` struct:
 
-- **Bugs stage** (`sim_*` exports): the two side panels, sections 5 to 6.
+- **Hunt stage** (`sim_*` exports): the first-person alley hunt, sections 4 to 6.
 - **Oasis stage** (`oasis_*` exports): the settlement section, section 7. Phase 2.
-
-The stage abstraction (a `Stage` struct holding framebuffer, accumulator, palette, and update/render function pointers) is built in phase 1 with a single stage so that phase 2 adds one rather than restructuring.
 
 ```
 index.html
 styles.css
-shim.js                  wasm load, frame loop, canvas blit, DOM wiring (~60 lines)
+shim.js                  wasm load, frame loop, blit, counter, fallbacks (~50 lines)
 sim/
-  sim.h                  exported API and shared constants
-  sim.c                  entry points, fixed-step accumulator, event queue
-  scene.c / scene.h      vignette state machine, pending request, idle timer, crossover triggers
-  rng.c / rng.h          seeded generator (mulberry32)
-  bug.c / bug.h          bug entity: wander, queue, hide, squash
-  hero.c / hero.h        character entity: walk to target, wind up, bonk, crossover
-  vignette.h             uniform vignette interface
-  vignettes/
-    patrol.c  race.c  detective.c  regression.c  crossover.c
-  draw.c / draw.h        framebuffer primitives: fill_rect, put_pixel, dim, 3x5 bitmap text
-  sprites.c / sprites.h  draw_bug, draw_hero, draw_prop, draw_fx (placeholder rects in v1)
+  export.h               SIM_EXPORT macro
+  rng.h / rng.c          mulberry32
+  events.h / events.c    packed event queue
+  draw.h / draw.c        Framebuffer, Color, view/clip, rect, dim
+  font.h / font.c        3x5 bitmap glyphs, draw_text
+  fmath.h                abs, min, max, clamp, Newton sqrt
+  trig.h / trig.c        sin/cos table (1024 entries) filled at init, atan2 approximation
+  stage.h / stage.c      Stage struct and fixed-step accumulator
+  palette.h / palette.c  night palette
+  map.h / map.c          ASCII map, parsing, cell queries, light map, BFS, hiding spots
+  textures.h / textures.c procedural wall, floor, sky, sprite, and HUD bitmaps generated at init
+  camera.h / camera.c    position, angle, bob, pitch offset, steering toward waypoints
+  raycast.h / raycast.c  wall casting with depth buffer, floor casting with decals, sky strip
+  sprites.h / sprites.c  sprite list, projection, depth-tested drawing
+  decals.h / decals.c    footprint decal grid
+  actors/dog.c / dog.h   wandering dogs
+  actors/trash.c / .h    loose trash and gusts
+  actors/bug.c / .h      the hidden bug
+  hud.h / hud.c          hand and hammer overlay, +1 flash
+  hunt.h / hunt.c        LOOK / FOLLOW / APPROACH / SMASH / CELEBRATE / NEW_TRAIL state machine
+  world.h / world.c      World struct: map, camera, decals, sprites, actors, rng, events, time
+  sim.h / sim.c          exports
   freestanding.c         memset, memcpy, memmove for the wasm build
-  stage.h                Stage struct: framebuffer, accumulator, palette, update/render hooks
-  oasis/                 phase 2
-    oasis.c / oasis.h    build sequencer, phases, fast-forward, replay, ambient loop
-    buildings.c / .h     slot layout, kinds, growth animation, glow, canals, hit test
-    crew.c / crew.h      crew members: walk in, hammer at slot, wander
-  sprites_oasis.c        settlement sprites: buildings, palms, water, lanterns, crew (placeholder rects in v1)
-test/
-  test.h                 minimal assert/report harness
-  test_main.c            native test binary entry
-  test_*.c               one file per module under test
-Makefile                 targets: wasm, test, serve, clean
-docs/superpowers/specs/  this document
+test/                    native tests, wasm_smoke.mjs
+docs/superpowers/        this spec, plans
 ```
 
-### Exported API (C → shim)
+Removed from revision 3: `bug.c`/`hero.c` (side view), `vignettes/`, `scene.*`, the old `sprites.c`, the two-panel `world.c`.
 
-All exports are plain integers or pointers into wasm memory. No strings cross the boundary.
+### Exported API (hunt stage)
+
+All exports are integers or pointers into wasm memory. No strings.
 
 | Export | Purpose |
 |---|---|
-| `sim_init(seed, panel_w, panel_h, gap_w)` | Reset all state for the given logical sizes. |
-| `sim_update(elapsed_ms)` | Advance the fixed-step accumulator; runs as many 1/60s steps as needed, clamped. |
-| `sim_render()` | Draw both panels into the framebuffer. |
-| `sim_framebuffer()` / `sim_framebuffer_len()` | Pointer and byte length of the RGBA buffer, laid out as left panel and right panel side by side. |
-| `sim_request(vignette_id)` | Request a linked vignette (1 race, 2 detective, 3 regression). |
-| `sim_poll_event()` | Pop the next event as a packed integer, or 0 if none. Types: `VIGNETTE_START(name, auto)`, `VIGNETTE_END(name)`, `BUG_SQUASHED`. |
-| `sim_render_static()` | Arrange a fixed composition in both panels (character mid-bonk, a few bugs) and draw it into the framebuffer once, for the reduced-motion fallback on desktop. |
-| `sim_render_avatar()` | Draw a fixed 24×24 frame of the character mid-bonk with one bug into a separate small buffer, for the mobile avatar. |
+| `sim_init(seed, w, h)` | Reset all state and regenerate textures for a logical framebuffer of `w × h` (w 200..640, h 160..320). Returns 0, or -1 for bad sizes. |
+| `sim_update(elapsed_ms)` | Advance the fixed-step accumulator; runs as many 1/60s steps as needed, clamped to 250 ms. |
+| `sim_render()` | Draw the current view into the framebuffer. |
+| `sim_framebuffer()` / `sim_framebuffer_len()` | Pointer and byte length of the RGBA buffer (`w × h × 4`). |
+| `sim_poll_event()` | Pop the next packed event, or 0. |
+| `sim_render_static()` | Arrange a fixed composition (mid-trail, a lamp ahead, footprints, the bug peeking) and draw it once, for mobile and reduced motion. |
 | `memory` | The module's linear memory. |
 
-Phase 2 adds the oasis stage exports, following the same integer-only rule:
+Phase 2 adds the `oasis_*` exports listed in revision 3 (init, set_kind, start, update, render, framebuffer, focus, replay, building_at, render_static), unchanged.
 
-| Export | Purpose |
-|---|---|
-| `oasis_init(seed, n_buildings)` | Reset the settlement stage with N project buildings (clamped to 1 to 6) in the Barren phase. |
-| `oasis_set_kind(k, kind_id)` | Set the building kind for slot k, called once per card after init. |
-| `oasis_start()` | Begin the build from Barren. |
-| `oasis_update(elapsed_ms)` | Advance the settlement stage; same fixed-step and clamping rules as `sim_update`. |
-| `oasis_render()` | Draw the settlement into its own 320×80 framebuffer. |
-| `oasis_framebuffer()` / `oasis_framebuffer_len()` | Pointer and byte length of the settlement framebuffer. |
-| `oasis_focus(k)` | Focus building k, or -1 to clear. Fast-forwards the build if k is not yet built. |
-| `oasis_replay()` | Reset to Barren and start again. |
-| `oasis_building_at(x, y)` | Hit test in logical pixels; returns k or -1. |
-| `oasis_render_static()` | Draw the finished settlement once, for mobile. |
+Memory is static: the framebuffer buffer is sized `640 × 320 × 4`; textures, the skyline strip, the map, the decal grid, and the actor arrays are fixed-size arrays. No allocator.
 
-Both stages push into the one event queue read by `sim_poll_event`; each packed event carries a stage id. Oasis events: `BUILDING_DONE(k)`, `BUILD_COMPLETE`, `HERO_ARRIVED(k)`.
+### Module interfaces (inside C)
 
-Memory is static: fixed-size arrays sized for the caps in sections 5 and 7, a bugs framebuffer of 2 × 96 × 320 px, and an oasis framebuffer of 320 × 80 px. No allocator.
+- `map_parse(const char *const rows[], Map*)`, `map_is_floor(x, y)`, `map_wall_kind(x, y)`, `map_light(x, y)`, `map_bfs(from, to, out_path, max)`, `map_pick_hiding_spot(rng, from, min_steps)`, `map_is_connected()`.
+- `camera_step(Camera*, dt)`: moves toward `target` at walk speed when `walking`, turns toward `target_angle` at the turn rate, advances the bob phase; `camera_face(Camera*, x, y)` sets the target angle by `trig_atan2`.
+- `raycast_walls(World*, Framebuffer*, float *depth)`, `raycast_floor(World*, Framebuffer*)`, `raycast_sky(World*, Framebuffer*)`.
+- `sprites_draw(World*, Framebuffer*, const float *depth)` sorts and draws every active sprite.
+- `decals_clear`, `decals_lay_trail(Decals*, const Path*)`, `decals_sample(Decals*, fx, fy, out_glow)`, `decals_cull_behind(Decals*, trail_index)`.
+- `hunt_init(World*)`, `hunt_step(World*, dt)`, `hunt_state(const World*)`, `hunt_cycle_count(const World*)`.
+- `hud_draw(World*, Framebuffer*)`.
 
-### Vignette interface (inside C)
+## 10. Renderer
 
-```c
-typedef struct {
-    void (*enter)(World *w);
-    void (*update)(World *w, int dt_ms);
-    void (*draw)(World *w, Framebuffer *fb);   /* vignette props and overlays only */
-    int  (*at_beat_boundary)(const World *w);
-    int  (*is_done)(const World *w);
-    void (*exit)(World *w);
-} Vignette;
-```
+- **Walls.** One ray per screen column through the tile grid (DDA). Perpendicular distance fills a per-column depth buffer. Wall height 2.5 tiles, eye at 0.5: `lineTop = horizon - (2.0 / dist) * proj`, `lineBottom = horizon + (0.5 / dist) * proj`, where `proj` is the projection constant for the field of view. Texture column from the hit fraction; texture row from the vertical position; shading from distance fog `1 / (1 + 0.35 * dist)`, a side factor (0.8 for north/south faces), and the light map.
+- **Floor.** For each row below the horizon: `rowDist = 0.5 * proj / (row - horizon)`; per column, the world point along the ray; tile kind chooses asphalt or puddle; the light map and fog shade it; the decal grid supplies footprint colour and glow where a footprint covers the point.
+- **Sky.** Rows above the walls copy from the skyline strip: `skyColumn = ((angle + columnAngle) / 2π) * 1024 mod 1024`, row from the screen row. Generated at init: a gradient, stars, tower silhouettes of varying height and width with lit window dots decided by the seed.
+- **Sprites.** Each sprite has a world position, kind, frame, and size in tiles. Per frame: transform into camera space, cull behind the camera, sort far to near, compute screen x and height, draw its texture column by column where `dist < depth[column]`, shaded by fog and the light at its tile.
+- **Textures.** 64×64 walls (brick, concrete, window with per-tile hash for lit panes, neon name sign, generic sign, poster, dumpster), 64×64 floor (asphalt, puddle), 32×32 sprites (dog trot ×2, dog sniff, trash can, paper ×2, newspaper ×2, bug hidden/peek/exposed, dust ×2), 32×64 lamp post, 96×64 hand-and-hammer ×3 frames. All generated at init into static arrays.
+- **HUD.** The hammer frame at bottom centre offset by the bob; the `+1` flash drawn with `draw_text` scaled ×3 above the hammer for 0.8 s after a hit.
+- **Math.** `trig_sin`/`trig_cos` from a 1024-entry table filled at init by a degree-7 polynomial (error under 1e-4); `trig_atan2` from a rational approximation (error under 0.005 rad); `fm_sqrt` by Newton's method. No libm.
 
-Vignettes script the actors and props; they never touch the framebuffer except through `draw.h` and `sprites.h`.
+## 11. Frame loop and rendering order
 
-### Shim responsibilities
+- Fixed logic step of 1/60s inside C with an accumulator; the shim calls `sim_update` once per animation frame with real elapsed milliseconds (clamped to 250 ms), then `sim_render`.
+- Per step: gusts and trash, dogs, the hunt state machine (which drives the camera), the camera, decal culling, HUD timers.
+- Per render: sky, walls (filling the depth buffer), floor, sprites, HUD.
+- The shim stops scheduling frames when the tab is hidden and resumes with a fresh timestamp.
+- **Static mode** (mobile and reduced motion): `sim_init`, `sim_render_static`, one blit, no loop.
 
-Instantiate the module with `WebAssembly.instantiateStreaming`; compute logical sizes and integer scale on resize via `ResizeObserver` and call `sim_init`; run one `requestAnimationFrame` loop that calls `sim_update` then `sim_render`, wraps the framebuffer in an `ImageData`, and blits each half to its canvas through a small offscreen canvas with smoothing off; drain `sim_poll_event` each frame and update card glow and counter; attach hover and focus handlers to case files; handle the desktop media query, reduced motion, and the debug query parameter. In phase 2 it also drives the oasis stage: an `IntersectionObserver` for start and pause, the same blit path into the landscape canvas, project card hover and focus, canvas hit testing, and the replay button.
+## 12. Build and toolchain
 
-## 10. Frame loop and rendering
+- **Compiler:** clang with the `wasm32` target via `zig cc` (Zig 0.16 installed). Homebrew LLVM is the alternative.
+- **Wasm build:** one Makefile command with `-target wasm32-freestanding -std=c11 -nostdlib -ffreestanding -fno-builtin -fvisibility=hidden -mbulk-memory -O2 -g0 -Wall -Wextra -Isim -Wl,--no-entry -Wl,--strip-all`. Exports marked with `__attribute__((export_name("...")))`. The build is reproducible (identical bytes across runs).
+- **Native test build:** the same sources with the system compiler and `-fsanitize=address,undefined -Wall -Wextra`; `make test` builds and runs.
+- **Serving:** any static host. `.wasm` should be served as `application/wasm`; the shim falls back to array-buffer instantiation otherwise.
 
-- Fixed logic step of 1/60s inside C with an accumulator; the shim calls `sim_update` with real elapsed milliseconds once per animation frame, then `sim_render`.
-- Elapsed time is clamped to 250ms so the world never fast-forwards after a tab switch.
-- The shim stops scheduling frames on `visibilitychange` to hidden and resumes with a fresh timestamp.
-- **Static mode**: the shim instantiates the module, calls `sim_init`, renders exactly once, blits, and never schedules a frame. On desktop with reduced motion it calls `sim_render_static` for both panels; on mobile it calls `sim_render_avatar` for the avatar canvas.
-- Rendering order per panel: background and grid, ground line, props behind actors, bugs, hero, fx, vignette overlays such as the detective dim.
-- Floating point is allowed in C (wasm has native float ops); libm functions are not. Positions use fixed-point or float arithmetic without `sqrt`, `sin`, or similar.
+## 13. Accessibility and motion
 
-## 11. Build and toolchain
-
-- **Compiler:** clang with the `wasm32` target. Apple's bundled clang lacks it. Preferred install is Zig, which ships a wasm-capable clang as `zig cc`; Homebrew LLVM is the alternative.
-- **Wasm build:** one command in the Makefile, in spirit:
-
-  ```sh
-  clang --target=wasm32 -nostdlib -ffreestanding -fvisibility=hidden -O2 \
-        -Wl,--no-entry -o sim.wasm sim/*.c sim/vignettes/*.c
-  ```
-
-  Exports are marked with `__attribute__((export_name("...")))`, which exports them despite hidden default visibility; the linker exports linear memory by default. The compiler may lower struct copies and zero-fills to `memcpy` and `memset` calls, which `freestanding.c` provides. With Zig the same flags apply through `zig cc --target=wasm32-freestanding`. Optional `wasm-opt -Oz` from Binaryen for a further size reduction; not required.
-- **Debug build:** add `-g` for DWARF so Chrome's C/C++ DevTools extension can step through source.
-- **Native test build:** the same sources minus `freestanding.c`, compiled with the system compiler and `-fsanitize=address,undefined`, linked with the test files into one binary. `make test` builds and runs it.
-- **Serving:** any static file server. The `.wasm` file must be served as `application/wasm`; the shim falls back to `WebAssembly.instantiate` on an array buffer if streaming instantiation is rejected.
-
-## 12. Accessibility and motion
-
-- Canvases carry `aria-hidden="true"` and `role="presentation"`.
-- Case files are ordinary focusable elements with real text; the page is fully readable with no animation.
-- Under `prefers-reduced-motion: reduce`, the shim uses static mode with `sim_render_static`: each panel shows one frame of the character mid-bonk with a few bugs, and no loop runs.
+- The scene canvas carries `aria-hidden="true"` and `role="presentation"` and sits behind all content.
+- The hero card is ordinary HTML; the page is fully readable with no animation. Case files are not interactive.
+- Under `prefers-reduced-motion: reduce`, and on mobile, static mode: one frame, no loop.
 - The counter is not announced live.
 
-## 13. Resilience
+## 14. Resilience
 
-- The failure mode is always "hero card still works." Wasm fetch or instantiation failure, canvas creation failure, or any shim exception falls back to the hero-only layout with the panels left as plain background colour.
-- Resize is handled by `ResizeObserver`, debounced by about 200 ms so a window drag does not restart the scene on every pixel; the shim recomputes the integer scale and calls `sim_init` again only when logical sizes change, otherwise just re-letterboxes.
-- The resume link and all below-the-fold content are plain HTML and never depend on JavaScript or wasm. If the oasis stage fails for any reason the project cards still read as plain text and the canvas stays sand-coloured.
+- The failure mode is always "hero card still works." Any wasm or canvas failure adds `no-sim` to `body`; the canvas stays a plain dark background and the card is untouched.
+- Every shim callback (frame loop, resize, media-query change, visibility change) routes exceptions to the fallback.
+- Resize is debounced by about 200 ms; the shim re-inits only when the logical framebuffer size changes, which restarts the hunt; otherwise it only rescales.
+- The resume link and below-the-fold content never depend on JavaScript or wasm.
 
-## 14. Performance and load budget
+## 15. Performance and load budget
 
-- `sim.wasm` under 40KB uncompressed in phase 1 and under 64KB with the oasis stage; `shim.js` under 3KB gzipped in phase 1 and under 5KB gzipped in phase 2. Comparable to the earlier JavaScript design and with fewer requests.
-- The hero card renders before any script runs; the module script is deferred, so first paint is unaffected.
-- At most 20 bugs per side; the bugs renderer touches at most 2 × 96 × 320 pixels per frame and the oasis renderer 320 × 80. Target under 1ms of CPU per frame per stage including the blit. The oasis stage only updates while its section is in view.
-- No web fonts in version one; system monospace stack for the hero card.
+- `sim.wasm` under 64 KB uncompressed (textures are generated, not stored); under 96 KB with the oasis stage.
+- `shim.js` under 2.5 KB gzipped.
+- Under 3 ms of CPU per frame at 356×200 on a 2020 laptop; the renderer touches at most `w × h` pixels plus sprite columns per frame.
+- The hero card paints before any script runs; the module script is deferred.
+- No web fonts; system monospace stack. No requests beyond `index.html`, `styles.css`, `shim.js`, `sim.wasm`, and a `data:` favicon.
 
-## 15. Testing
+## 16. Testing
 
-- **Native unit tests** in C, run by `make test` under AddressSanitizer and UndefinedBehaviorSanitizer:
-  - Scene: a request mid-beat waits; a request at a boundary swaps; a request for the current vignette is ignored; a newer pending request replaces an older one; the idle timer fires after 45s and never repeats the last vignette; a finished vignette returns to patrol; crossover triggers on bug imbalance and on the 120s timer but never during a linked vignette.
-  - Hero: walk-to-target arrives and stops; crossover duration equals gap width over walk speed.
-  - Bugs: wander stays within panel bounds; cap is respected.
-  - Events: queue order is preserved; overflow drops the oldest; packed encoding round-trips.
-  - RNG: same seed yields the same sequence.
-  - Draw: `fill_rect` clips at framebuffer edges; the dim overlay reduces every channel; bitmap text renders the expected pixels for a known glyph.
-- **Headless vignette tests:** step each vignette's `update` with a fixed dt and assert phase progression. For `race`: setup → rush → collide → lock → queue → resolved → done.
-- **Oasis stage tests (phase 2):**
-  - Sequencer: phases advance in order with the durations in section 7.2; `BUILDING_DONE` is emitted exactly once per building in slot order; `v0.5` appears when half the buildings are done and `v1.0` at the last; `BUILD_COMPLETE` follows the wink.
-  - Fast-forward: focusing an unbuilt building reaches `BUILDING_DONE(k)` in less simulated time than a normal run, and the rate returns to normal afterwards.
-  - Replay resets to Barren; skipping `oasis_update` calls preserves state exactly.
-  - Hit test returns k at each slot's centre and -1 on sand and water; unknown kinds fall back to house; N clamps to 1 to 6.
-  - Canal for building k exists only after `BUILDING_DONE(k)`.
-- **Browser verification** via Chrome DevTools: screenshots at 1440×900 (desktop grid) and 390×844 (mobile fallback with avatar); each vignette via `?vignette=`; hover linking and card glow; `prefers-reduced-motion` emulated; the network panel confirming wasm size and `application/wasm` content type. Phase 2 adds: scroll into the settlement section and screenshot the Barren, mid-build, and Ambient states; project card hover and canvas hover both ways; replay; the static frame on mobile.
+- **Native unit tests** (`make test`, ASan/UBSan, zero warnings):
+  - Trig: table values at 0, π/6, π/4, π/2, π within 1e-3; `atan2` quadrants within 0.01.
+  - Map: parse dimensions and legend counts on the real map; connectivity; BFS shortest path on a known 8×8 map; hiding spot at least `min_steps` away and adjacent to `T` or `D`.
+  - Raycast: on a 7×7 test map with the camera at the centre facing +x, the centre column hits at distance 3 ± 0.01 and its wall height matches the formula; depth is monotonic along a corridor; floor row-to-distance mapping matches the formula at three rows; sky column wraps.
+  - Sprites: a sprite straight ahead at distance 2 projects to the centre column with the expected height; behind the camera it is culled; behind a wall it is occluded; sort order is far to near.
+  - Camera: turns the short way around ±π; arrives at a waypoint and stops; bob amplitude within 3 px.
+  - Decals: a trail lays the expected number of pairs; sampling on a print returns glow > 0 and off it returns 0; culling removes prints more than 6 tiles behind.
+  - Dogs stay on floor tiles for 60 s; trash moves only during gusts and stops at walls.
+  - Hunt: a full cycle from LOOK to NEW_TRAIL emits exactly one `BUG_SQUASHED`, lays a new trail of at least 12 steps, and is deterministic for a seed (two runs, same event frames).
+  - Exports: init bounds; framebuffer length; painted pixels in all four quadrants of a frame; static frame contains footprint yellow and hammer yellow; 250 ms clamp.
+- **Smoke:** `node test/wasm_smoke.mjs` checks zero imports, the eight exports, size, a rendered frame, and at least one squash event within 120 s of simulated time.
+- **Browser:** screenshots at 1440×900 (card left, alley right, hammer at bottom) and 390×844 (card full width over a still frame); `?motion=reduce`; console clean; network shows exactly the four files; the renamed-module fallback shows a plain card.
 
-## 16. Out of scope for version one
+## 17. Out of scope for this revision
 
-- Real sprite artwork and sound.
-- Clicking bugs to squash them or steering the character.
-- Analytics.
-- Below-the-fold content beyond a placeholder section.
+- Visitor steering (keyboard or mouse look), variable wall heights, rain, sound.
+- The settlement stage (phase 2) implementation.
+- Real sprite artwork; everything stays procedural.
 - Persisting the counter across visits.
-- Minification or a bundling step; the shim is small enough to ship as written.
-- Settlement ideas held for later: a sandstorm setback mid-build, and the side-panel character walking off its panel to arrive in the settlement on scroll.
-- Animated settlement on mobile; mobile gets the static finished frame.
+- Minification or bundling.
 
-## 17. Author-supplied content
-
-These are content inputs, not design decisions, and can be filled in at any time before launch:
+## 18. Author-supplied content
 
 - Name, title line, pitch sentence.
-- Three case files: tag (fixed above), symptom line, fix line, optional write-up link.
+- Three case files: tag, symptom line, fix line, optional link.
 - Email address, GitHub URL, resume PDF.
-- The source repository URL for the engine credit line.
-- Two to five project cards for the settlement section: project name, what it was, outcome, role, and a building kind from the catalogue in section 7.5.
+- The first name to render on the neon sign (defaults to `ROHIT`).
+- Phase 2: two to five project cards with a building kind each.
