@@ -13,6 +13,7 @@ void test_world(void);
 void test_sprites(void);
 void test_stage(void);
 void test_patrol(void);
+void test_scene(void);
 
 int main(void) {
     RUN(test_harness);
@@ -26,6 +27,7 @@ int main(void) {
     RUN(test_sprites);
     RUN(test_stage);
     RUN(test_patrol);
+    RUN(test_scene);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
