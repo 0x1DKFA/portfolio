@@ -61,3 +61,12 @@ void draw_dim(Framebuffer *fb, int x, int y, int w, int h, int amount) {
             p[2] = (uint8_t)((p[2] * keep) / 255);
         }
 }
+
+Color draw_shade(Color c, float f) {
+    if (f < 0.0f) f = 0.0f;
+    if (f > 1.0f) f = 1.0f;
+    c.r = (uint8_t)((float)c.r * f);
+    c.g = (uint8_t)((float)c.g * f);
+    c.b = (uint8_t)((float)c.b * f);
+    return c;
+}

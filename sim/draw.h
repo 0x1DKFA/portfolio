@@ -22,5 +22,6 @@ void  draw_clear(Framebuffer *fb, Color c);                 /* whole buffer, no 
 void  draw_pixel(Framebuffer *fb, int x, int y, Color c);
 void  draw_rect(Framebuffer *fb, int x, int y, int w, int h, Color c);
 void  draw_dim(Framebuffer *fb, int x, int y, int w, int h, int amount); /* 0 none .. 255 black */
+Color draw_shade(Color c, float f);   /* scale rgb by f clamped to [0, 1]; alpha unchanged */
 
 #endif

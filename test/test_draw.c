@@ -49,4 +49,11 @@ void test_draw(void) {
     CHECK(is(fb_get(&fb, 1, 1), 0, 0, 0));
     draw_dim(&fb, 5, 5, 1, 1, 0);
     CHECK(is(fb_get(&fb, 5, 5), 200, 100, 50));
+
+    Color sh = draw_shade(COLOR(200, 100, 50), 0.5f);
+    CHECK(sh.r == 100 && sh.g == 50 && sh.b == 25 && sh.a == 255);
+    sh = draw_shade(COLOR(200, 100, 50), 2.0f);
+    CHECK(sh.r == 200 && sh.g == 100 && sh.b == 50);
+    sh = draw_shade(COLOR(200, 100, 50), -1.0f);
+    CHECK(sh.r == 0 && sh.g == 0 && sh.b == 0 && sh.a == 255);
 }
