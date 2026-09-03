@@ -133,6 +133,7 @@ float map_light(const Map *m, int x, int y) {
 
 static const int DX[4] = { 1, -1, 0, 0 }, DY[4] = { 0, 0, 1, -1 };
 
+/* Uses static scratch buffers: not reentrant. The simulation is single-threaded and never nests these calls. */
 int map_distances(const Map *m, Tile from, int16_t *dist) {
     static int queue[MAP_W * MAP_H];
     int n = m->w * m->h, head = 0, tail = 0, reach = 0;

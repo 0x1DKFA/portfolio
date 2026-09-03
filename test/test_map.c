@@ -12,8 +12,9 @@ static const char *const SMALL[8] = {
     "########",
 };
 
-static const char *const BAD_CHAR[2] = { "##", "#x" };
-static const char *const BAD_LEN[2]  = { "##", "###" };
+static const char *const BAD_CHAR[3] = { "###", "#x#", "###" };
+static const char *const BAD_LEN[3]  = { "###", "####", "###" };
+static const char *const SHORT_ROW[3] = { "###", "##", "###" };
 
 void test_map(void) {
     static Map m;
@@ -97,7 +98,11 @@ void test_map(void) {
     CHECK_EQ(reach, 20);
     CHECK(!map_pick_hiding_spot(&s, &rng, (Tile){1, 1}, 1, &spot));   /* no T or D anywhere */
 
-    CHECK_EQ(map_parse(&s, BAD_CHAR, 2, 2), -1);
-    CHECK_EQ(map_parse(&s, BAD_LEN, 2, 2), -1);
+    CHECK_EQ(map_parse(&s, BAD_CHAR, 3, 3), -1);
+    CHECK_EQ(map_parse(&s, BAD_LEN, 3, 3), -1);
+    CHECK_EQ(map_parse(&s, SHORT_ROW, 3, 3), -1);
+    static const char *const OK3[3] = { "###", "#.#", "###" };
+    CHECK_EQ(map_parse(&s, OK3, 3, 3), 0);
+    CHECK_EQ(map_parse(&s, OK3, 2, 3), -1);                   /* the size guard still applies */
     CHECK_EQ(map_parse(&s, SMALL, MAP_W + 1, 8), -1);
 }
