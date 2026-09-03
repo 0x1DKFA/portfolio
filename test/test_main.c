@@ -15,6 +15,7 @@ void test_stage(void);
 void test_patrol(void);
 void test_scene(void);
 void test_crossover(void);
+void test_race(void);
 
 int main(void) {
     RUN(test_harness);
@@ -30,6 +31,7 @@ int main(void) {
     RUN(test_patrol);
     RUN(test_scene);
     RUN(test_crossover);
+    RUN(test_race);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
