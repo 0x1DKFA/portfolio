@@ -6,6 +6,8 @@
 #define TRIG_HALF_PI 1.57079633f
 #define TRIG_TABLE 1024
 
+/* Angles are floats in radians. Supported input range is |a| < 1e9; the simulation wraps every angle each step, so real inputs stay within a few turns. */
+
 void  trig_init(void);
 float trig_sin(float a);
 float trig_cos(float a);

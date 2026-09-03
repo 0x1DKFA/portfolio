@@ -35,4 +35,8 @@ void test_trig(void) {
     CHECK_NEAR(trig_wrap(-TRIG_TAU - 0.5f), -0.5f, 1e-4);
     CHECK_NEAR(trig_wrap(TRIG_PI + 0.1f), -TRIG_PI + 0.1f, 1e-4);
     CHECK(trig_wrap(TRIG_PI) > 3.14f && trig_wrap(TRIG_PI) <= TRIG_PI + 1e-6f);
+    CHECK_NEAR(trig_wrap(1000.0f * TRIG_TAU + 0.25f), 0.25f, 1e-2);   /* large angle, no long loop */
+    CHECK_NEAR(trig_wrap(-1000.0f * TRIG_TAU - 0.25f), -0.25f, 1e-2);
+    CHECK_NEAR(trig_wrap(2e9f), 0.0f, 1e-6);                          /* out of range clamps to zero */
+    CHECK(trig_wrap(TRIG_PI) <= TRIG_PI + 1e-6f && trig_wrap(TRIG_PI) > -TRIG_PI);
 }

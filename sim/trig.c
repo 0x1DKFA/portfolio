@@ -30,8 +30,11 @@ void trig_init(void) {
 }
 
 float trig_wrap(float a) {
-    while (a > TRIG_PI) a -= TRIG_TAU;
-    while (a <= -TRIG_PI) a += TRIG_TAU;
+    if (a != a) return 0.0f;                                   /* NaN */
+    if (a > 1e9f || a < -1e9f) return 0.0f;                    /* beyond the supported range; see trig.h */
+    a -= (float)(int)(a / TRIG_TAU) * TRIG_TAU;                /* now within one turn of zero */
+    if (a > TRIG_PI) a -= TRIG_TAU;
+    if (a <= -TRIG_PI) a += TRIG_TAU;
     return a;
 }
 
