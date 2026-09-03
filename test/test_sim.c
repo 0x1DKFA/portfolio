@@ -95,6 +95,22 @@ void test_sim(void) {
     CHECK(has_color(av, 24, 24, 0, 24, &PALETTE_BUGS[COL_HERO_SKIN]));
     CHECK(has_color(av, 24, 24, 0, 24, &PALETTE_BUGS[COL_BUG_A]));
 
+    /* detective dims only its own panel */
+    CHECK_EQ(sim_init(5u, 96, 240, 200), 0);
+    sim_request(2);
+    CHECK(run_until_event(120, EV_VIGNETTE_START, 2));
+    for (int i = 0; i < 350; i++) sim_update(17);
+    sim_render();
+    px = sim_framebuffer();
+    const uint8_t *row2 = px + 2 * 192 * 4;
+    CHECK(has_color(row2, 192, 1, 96, 192, &PALETTE_BUGS[COL_BG]));
+    int left_dimmed = 1;
+    for (int x = 0; x < 96; x++) {
+        const uint8_t *p = row2 + x * 4;
+        if (!(p[0] < PALETTE_BUGS[COL_BG].r && p[1] < PALETTE_BUGS[COL_BG].g && p[2] < PALETTE_BUGS[COL_BG].b)) { left_dimmed = 0; break; }
+    }
+    CHECK(left_dimmed);
+
     /* re-init resets the scene without leaking state */
     CHECK_EQ(sim_init(99u, 96, 200, 100), 0);
     CHECK_EQ(sim_framebuffer_len(), 2 * 96 * 200 * 4);

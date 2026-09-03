@@ -121,7 +121,7 @@ static void draw_back(World *w, Framebuffer *fb, const Color *pal) {
 
 static void draw_front(World *w, Framebuffer *fb, const Color *pal) {
     if (S.dim <= 0) return;
-    draw_dim(fb, -4096, -4096, 8192, 8192, S.dim);           /* whole view; clipping bounds it */
+    draw_dim(fb, (int)world_panel_x0(w, S.side), 0, w->panel_w, w->panel_h, S.dim);
     if (w->hero.detective) {
         sprite_glass(fb, pal, (int)w->hero.glass_x, (int)w->hero.glass_y);
         draw_prints(w, fb, pal, 1);
