@@ -155,6 +155,17 @@ void test_scene(void) {
     steps(60);
     CHECK_EQ(sc.current, VIG_PATROL);
 
+    /* crossover waits for a patrol beat boundary so a swing is never cut */
+    fresh(9u);
+    sc.idle_timer = -1e6f;
+    fake_boundary = 0;
+    for (int i = 0; i < 6; i++) world_spawn_bug(&w, SIDE_RIGHT);
+    steps(10);
+    CHECK_EQ(sc.current, VIG_PATROL);
+    fake_boundary = 1;
+    steps(1);
+    CHECK_EQ(sc.current, VIG_CROSSOVER);
+
     /* never crossover during a linked vignette */
     fresh(7u);
     scene_request(&sc, VIG_RACE);

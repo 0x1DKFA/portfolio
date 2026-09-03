@@ -73,7 +73,7 @@ void scene_step(Scene *sc, float dt) {
             int pick = pick_auto(sc);
             sc->pending = pick; sc->pending_auto = 1; sc->last_auto = pick;
             sc->idle_timer = 0.0f;
-        } else if (sc->since_crossover >= SCENE_CROSSOVER_INTERVAL || imbalance(sc)) {
+        } else if ((sc->since_crossover >= SCENE_CROSSOVER_INTERVAL || imbalance(sc)) && cur->at_beat_boundary(w)) {
             leave(sc);
             enter(sc, VIG_CROSSOVER, 0);
             sc->since_crossover = 0.0f;
