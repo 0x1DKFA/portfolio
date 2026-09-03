@@ -16,6 +16,7 @@ void test_camera(void);
 void test_decals(void);
 void test_sprites(void);
 void test_raycast(void);
+void test_hud(void);
 
 int main(void) {
     RUN(test_harness);
@@ -32,6 +33,7 @@ int main(void) {
     RUN(test_decals);
     RUN(test_sprites);
     RUN(test_raycast);
+    RUN(test_hud);
     fprintf(stderr, "%d checks, %d failures\n", test_checks, test_failures);
     return test_failures ? 1 : 0;
 }
