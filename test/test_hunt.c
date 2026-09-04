@@ -106,6 +106,23 @@ void test_hunt(void) {
     for (int y = hz + 1; y < 200; y++) for (int x = 0; x < 320; x++) if (yellow(fb_get(&fb, x, y)) && !same(fb_get(&fb, x, y), PALETTE_NIGHT[COL_HAMMER])) yellow_floor++;
     CHECK(yellow_floor > 20);                                      /* footprints ahead */
 
+    /* an inspect pause must never be read as arrival, even if APPROACH starts during it */
+    world_init(&w, 5u, 320, 200, &ev, "ROHIT");
+    run_until_state(&w, HUNT_FOLLOW, 3 * 60);
+    for (int i = 0; i < 30 && w.hunt.walking_to < 0; i++) world_step(&w, DT);   /* a leg is in progress */
+    CHECK(w.hunt.walking_to >= 0);
+    int wp_before = w.hunt.waypoint, leg = w.hunt.walking_to;
+    float mid_x = w.cam.x, mid_y = w.cam.y;
+    w.hunt.inspecting = 1; w.hunt.inspect_t = 0.0f; w.cam.walking = 0;          /* the pause */
+    w.hunt.state = HUNT_APPROACH; w.hunt.t = 0.0f;                                /* the race: APPROACH begins mid-pause */
+    world_step(&w, DT);
+    CHECK_EQ(w.hunt.waypoint, wp_before);                                          /* no skipped waypoint */
+    CHECK_EQ(w.hunt.walking_to, leg);
+    CHECK_EQ(w.hunt.inspecting, 0);                                                /* the pause was ended cleanly */
+    CHECK_EQ(w.cam.pitch_px, 0);
+    CHECK(w.cam.walking);                                                          /* and the leg resumed */
+    CHECK(camera_dist(&w.cam, mid_x, mid_y) < 0.1f);                              /* from where it stood */
+
     /* the largest framebuffer works too */
     Framebuffer big; fb_init(&big, px, 640, 320);
     CHECK_EQ(world_init(&w, 5u, 640, 320, &ev, "ROHIT"), 0);

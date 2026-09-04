@@ -1,12 +1,17 @@
 #include "hunt.h"
 #include "world.h"
 #include "trig.h"
-#include "fmath.h"
 
 static float wp_x(const Hunt *h, int i) { return (float)h->path.t[i].x + 0.5f; }
 static float wp_y(const Hunt *h, int i) { return (float)h->path.t[i].y + 0.5f; }
 
 static void begin(Hunt *h, int state) { h->state = state; h->t = 0.0f; }
+
+static void end_inspect(World *w) {
+    Hunt *h = &w->hunt; Camera *c = &w->cam;
+    h->inspecting = 0; h->inspect_t = 0.0f; c->pitch_px = 0;
+    if (h->walking_to >= 0) c->walking = 1;
+}
 
 static float next_inspect(World *w) {
     return HUNT_INSPECT_MEAN + (rng_float(&w->rng) * 2.0f - 1.0f) * HUNT_INSPECT_SPREAD;
@@ -34,9 +39,10 @@ static void new_trail(World *w) {
     if (w->bug.spr) bug_set_state(&w->bug, &w->sprites, BUGSTATE_DEAD);
     bug_place(&w->bug, &w->sprites, bx, by);
 
-    h->inspect_timer = next_inspect(w); h->inspecting = 0; h->inspect_t = 0.0f;
+    h->inspect_timer = next_inspect(w);
     h->look_base = c->angle;
     camera_stop(c);
+    end_inspect(w);
     begin(h, HUNT_LOOK);
 }
 
@@ -49,7 +55,8 @@ int hunt_cycles(const World *w) { return w->hunt.cycles; }
 static void follow_path(World *w) {
     Hunt *h = &w->hunt; Camera *c = &w->cam;
     if (c->walking) return;
-    if (h->walking_to >= 0) {
+    if (h->inspecting) return;
+    if (h->walking_to >= 0 && !h->inspecting) {
         h->waypoint = h->walking_to + 1;
         decals_set_head_waypoint(&w->decals, h->walking_to);
         h->walking_to = -1;
@@ -85,7 +92,7 @@ void hunt_step(World *w, float dt) {
         if (h->inspecting) {
             h->inspect_t += dt;
             c->pitch_px = (int)((float)HUNT_INSPECT_DIP * trig_sin(TRIG_PI * h->inspect_t / HUNT_INSPECT_TIME));
-            if (h->inspect_t >= HUNT_INSPECT_TIME) { h->inspecting = 0; c->pitch_px = 0; c->walking = 1; }
+            if (h->inspect_t >= HUNT_INSPECT_TIME) end_inspect(w);
             break;
         }
         follow_path(w);
@@ -93,6 +100,7 @@ void hunt_step(World *w, float dt) {
         if (h->inspect_timer <= 0.0f && c->walking) {
             h->inspecting = 1; h->inspect_t = 0.0f; c->walking = 0;
             h->inspect_timer = next_inspect(w);
+            break;
         }
         if (camera_dist(c, h->bug_x, h->bug_y) < HUNT_PEEK_DIST) {
             bug_set_state(&w->bug, &w->sprites, BUGSTATE_PEEK);
@@ -101,6 +109,7 @@ void hunt_step(World *w, float dt) {
         break;
 
     case HUNT_APPROACH: {
+        if (h->inspecting) end_inspect(w);
         follow_path(w);
         if (h->waypoint >= h->path.n && !c->walking && camera_dist(c, h->bug_x, h->bug_y) >= HUNT_SMASH_DIST) {
             camera_walk_to(c, (float)h->hiding.x + 0.5f, (float)h->hiding.y + 0.5f);
