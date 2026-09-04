@@ -1,11 +1,10 @@
 :root {
-  --bg: #12162a;
-  --card: #1b2140;
+  --bg: #0a0c18;
+  --card: rgba(27, 33, 64, 0.92);
   --line: #2a3160;
   --text: #dce1f0;
   --muted: #98a0c0;
   --accent: #fac83c;
-  --glow: #fff096;
 }
 
 * { box-sizing: border-box; }
@@ -18,94 +17,69 @@ html, body {
   line-height: 1.5;
 }
 
-.stage {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  min-height: 100vh;
-}
-
-.panel {
+#scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   background: var(--bg);
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
-.hero {
+.stage {
   position: relative;
   z-index: 1;
   display: flex;
+  align-items: center;
+  min-height: 100vh;
+  padding: 6vh 5vw;
+}
+
+.hero {
+  display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 3rem 2.5rem;
+  gap: 1rem;
+  width: clamp(320px, 34vw, 520px);
+  max-height: 88vh;
+  overflow: auto;
+  padding: 1.75rem 1.5rem;
   background: var(--card);
-  box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
-.avatar { display: none; width: 96px; height: 96px; image-rendering: pixelated; }
-
-h1 { margin: 0; font-size: 2rem; line-height: 1.2; }
+h1 { margin: 0; font-size: 1.75rem; line-height: 1.2; }
 .title { margin: 0.25rem 0 0; color: var(--muted); }
-.pitch { margin: 0.75rem 0 0; font-size: 1.125rem; }
+.pitch { margin: 0.6rem 0 0; font-size: 1.05rem; }
 
-.case-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
-
-.case-file {
-  position: relative;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.case-file:hover { border-color: #3a4380; }
-.case-file:focus-visible { border-color: var(--accent); }
-.case-file.is-playing {
-  border-color: var(--glow);
-  box-shadow: 0 0 0 2px rgba(255, 240, 150, 0.25), 0 0 18px rgba(255, 240, 150, 0.25);
-}
-.case-file.is-playing::after {
-  content: "\25B6";
-  position: absolute;
-  top: 0.6rem;
-  right: 0.75rem;
-  font-size: 0.7rem;
-  color: var(--glow);
-}
-
-.tag {
-  display: inline-block;
-  margin-bottom: 0.35rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-.case-file p { margin: 0.15rem 0; }
+.case-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.case-file { padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-radius: 6px; }
+.tag { display: inline-block; margin-bottom: 0.3rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.case-file p { margin: 0.1rem 0; font-size: 0.95rem; }
 .fix { color: var(--muted); }
 
-.contact { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.contact { display: flex; flex-wrap: wrap; gap: 1.1rem; }
 .contact a { color: var(--text); }
 
 .counter { margin: 0; font-size: 0.85rem; color: var(--muted); }
-.credit { margin: auto 0 0; font-size: 0.75rem; color: var(--muted); }
+.credit { margin: 0; font-size: 0.72rem; color: var(--muted); }
 .credit a { color: var(--muted); }
 
-.below { max-width: 60rem; margin: 0 auto; padding: 3rem 2.5rem; }
-
-body.no-sim .panel { background: var(--bg); }   /* set by shim.js when the simulation cannot start */
-body.no-sim .avatar { display: none; }
-
-@media (max-width: 1023.98px) {
-  .stage { grid-template-columns: 1fr; min-height: auto; }
-  .panel { display: none; }
-  .avatar { display: block; }
-  .hero { min-height: 100vh; padding: 2rem 1.25rem; }
+.below {
+  position: relative;
+  z-index: 1;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 3rem 2.5rem;
+  background: var(--bg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .case-file { transition: none; }
+body.no-sim #scene { background: var(--bg); }   /* set by shim.js when the simulation cannot start */
+
+@media (max-width: 1023.98px) {
+  .stage { align-items: flex-start; padding: 4vh 4vw; }
+  .hero { width: 100%; max-height: none; overflow: visible; }
 }
