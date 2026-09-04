@@ -14,6 +14,7 @@ const canvas = document.getElementById('scene');
 const counterEl = document.getElementById('squashed');
 
 let sim = null, geom = null, off = null, raf = 0, last = 0, squashed = 0, resizeTimer = 0;
+let staticRendered = false;
 
 function fail(err) {
   console.warn('alley hunt disabled:', err);
@@ -34,14 +35,14 @@ async function loadWasm() {
 
 function seed() {
   const s = Number(params.get('seed'));
-  if (Number.isFinite(s) && s > 0) return s >>> 0;
+  if (Number.isFinite(s) && s >= 0) return s >>> 0;
   return (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
 }
 
 function measure() {
   const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
   const bw = Math.max(1, Math.round(innerWidth * dpr)), bh = Math.max(1, Math.round(innerHeight * dpr));
-  const scale = Math.max(1, Math.round(bh / LOGICAL_H));
+  const scale = Math.max(1, Math.round(bh / LOGICAL_H), Math.ceil(bw / MAX_W));
   const w = Math.min(MAX_W, Math.max(MIN_W, Math.ceil(bw / scale)));
   const h = Math.min(MAX_H, Math.max(MIN_H, Math.ceil(bh / scale)));
   return { bw, bh, scale, w, h };
@@ -86,10 +87,11 @@ function frame(now) {
 
 function startLoop() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
 function stopLoop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
-function renderStatic() { sim.sim_render_static(); blit(); drainEvents(); }
+function renderStatic() { sim.sim_render_static(); blit(); drainEvents(); staticRendered = true; }
 
 function applyMode() {
   stopLoop();
+  if (!staticMode() && staticRendered) { geom = null; staticRendered = false; }
   init();
   if (staticMode()) renderStatic(); else startLoop();
 }
