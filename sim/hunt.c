@@ -20,7 +20,7 @@ static float next_inspect(World *w) {
 static void new_trail(World *w) {
     Hunt *h = &w->hunt; Camera *c = &w->cam;
     Tile from = { (int)c->x, (int)c->y };
-    if (!map_pick_hiding_spot(&w->map, &w->rng, from, HUNT_MIN_STEPS, &h->hiding)) h->hiding = from;
+    if (!map_pick_hiding_spot(&w->map, &w->rng, from, HUNT_MIN_STEPS, HUNT_MAX_STEPS, &h->hiding)) h->hiding = from;
     if (!map_bfs(&w->map, from, h->hiding, &h->path) || h->path.n < 1) { h->path.n = 1; h->path.t[0] = from; }
     decals_lay_trail(&w->decals, &h->path);
     decals_set_head_waypoint(&w->decals, 0);

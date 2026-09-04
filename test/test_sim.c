@@ -43,7 +43,7 @@ void test_sim(void) {
             if (event_type(e) == EV_BUG_SQUASHED && event_stage(e) == STAGE_BUGS) squashed++;
     }
     CHECK_EQ(squashed, 1);
-    CHECK(frames * 17 >= 10 * 1000);
+    CHECK(frames * 17 >= 25 * 1000);
 
     /* the update clamps: a minute of elapsed time is at most 250 ms of simulation */
     CHECK_EQ(sim_init(9u, 356, 200), 0);

@@ -37,6 +37,6 @@ int   map_bfs(const Map *m, Tile from, Tile to, Path *out);       /* 1 if found;
 int   map_distances(const Map *m, Tile from, int16_t *dist);      /* dist[y*w+x]; -1 unreachable; returns reachable count */
 int   map_is_connected(const Map *m);
 int   map_is_hiding_spot(const Map *m, int x, int y);             /* floor, 4-adjacent to a trash can or dumpster */
-int   map_pick_hiding_spot(const Map *m, Rng *rng, Tile from, int min_steps, Tile *out);
+int   map_pick_hiding_spot(const Map *m, Rng *rng, Tile from, int min_steps, int max_steps, Tile *out); /* random spot with min_steps <= dist <= max_steps; else dist >= min_steps; else the farthest */
 
 #endif

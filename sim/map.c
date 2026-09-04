@@ -199,18 +199,37 @@ int map_is_hiding_spot(const Map *m, int x, int y) {
     return 0;
 }
 
-int map_pick_hiding_spot(const Map *m, Rng *rng, Tile from, int min_steps, Tile *out) {
+/* Picks a random hiding spot with min_steps <= dist <= max_steps from `from`. If none fall in that
+ * band, picks at random among spots at least min_steps away. If none of those exist either, falls
+ * back to the single farthest reachable hiding spot (deterministic first-in-scan on ties). */
+int map_pick_hiding_spot(const Map *m, Rng *rng, Tile from, int min_steps, int max_steps, Tile *out) {
     static int16_t dist[MAP_W * MAP_H];
     static Tile cands[MAP_W * MAP_H];
-    int n = 0, best = -1, best_d = 0;
+    int n, best, best_d;
     map_distances(m, from, dist);
+
+    n = 0;
+    for (int y = 0; y < m->h; y++) for (int x = 0; x < m->w; x++) {
+        int d = dist[y * m->w + x];
+        if (d < min_steps || d > max_steps || !map_is_hiding_spot(m, x, y)) continue;
+        cands[n].x = x; cands[n].y = y; n++;
+    }
+    if (n > 0) { *out = cands[rng_range(rng, 0, n - 1)]; return 1; }
+
+    n = 0;
+    for (int y = 0; y < m->h; y++) for (int x = 0; x < m->w; x++) {
+        int d = dist[y * m->w + x];
+        if (d < min_steps || !map_is_hiding_spot(m, x, y)) continue;
+        cands[n].x = x; cands[n].y = y; n++;
+    }
+    if (n > 0) { *out = cands[rng_range(rng, 0, n - 1)]; return 1; }
+
+    best = -1; best_d = 0;
     for (int y = 0; y < m->h; y++) for (int x = 0; x < m->w; x++) {
         int d = dist[y * m->w + x];
         if (d <= 0 || !map_is_hiding_spot(m, x, y)) continue;
-        if (d >= min_steps) { cands[n].x = x; cands[n].y = y; n++; }
         if (d > best_d) { best_d = d; best = y * m->w + x; }
     }
-    if (n > 0) { *out = cands[rng_range(rng, 0, n - 1)]; return 1; }
     if (best >= 0) { out->x = best % m->w; out->y = best / m->w; return 1; }
     return 0;
 }

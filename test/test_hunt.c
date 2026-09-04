@@ -55,7 +55,7 @@ void test_hunt(void) {
         if (w.cam.pitch_px != 0) inspected = 1;
     }
     CHECK_EQ(hunt_cycles(&w), 1);
-    CHECK(total >= 10 * 60 && total <= 120 * 60);
+    CHECK(total >= 25 * 60 && total <= 70 * 60);
     CHECK_EQ(events_count(&ev), 1);
     CHECK_EQ(event_type(events_pop(&ev)), EV_BUG_SQUASHED);
     CHECK_EQ(w.squashed_total, 1);

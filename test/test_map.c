@@ -68,11 +68,12 @@ void test_map(void) {
     Rng rng; rng_seed(&rng, 3u);
     Tile from = { 2, 2 }, spot;
     for (int i = 0; i < 20; i++) {
-        CHECK(map_pick_hiding_spot(&m, &rng, from, 12, &spot));
+        CHECK(map_pick_hiding_spot(&m, &rng, from, 12, 30, &spot));
         CHECK(map_is_hiding_spot(&m, spot.x, spot.y));
         Path p;
         CHECK(map_bfs(&m, from, spot, &p));
         CHECK(p.n - 1 >= 12);
+        CHECK(p.n - 1 <= 30);                    /* the band holds when candidates exist */
         CHECK_EQ(p.t[0].x, 2); CHECK_EQ(p.t[0].y, 2);
         CHECK_EQ(p.t[p.n - 1].x, spot.x); CHECK_EQ(p.t[p.n - 1].y, spot.y);
         for (int k = 1; k < p.n; k++) {          /* consecutive tiles are 4-neighbours on floor */
@@ -81,6 +82,7 @@ void test_map(void) {
             CHECK(map_is_floor(&m, p.t[k].x, p.t[k].y));
         }
     }
+    CHECK(map_pick_hiding_spot(&m, &rng, from, 200, 300, &spot));  /* no candidate that far: fallback to the farthest */
 
     /* small map: BFS detour length, unreachable pocket, connectivity false */
     static Map s;
@@ -96,7 +98,7 @@ void test_map(void) {
     CHECK_EQ(dist[6 * 8 + 6], 10);
     CHECK_EQ(dist[3 * 8 + 3], -1);
     CHECK_EQ(reach, 20);
-    CHECK(!map_pick_hiding_spot(&s, &rng, (Tile){1, 1}, 1, &spot));   /* no T or D anywhere */
+    CHECK(!map_pick_hiding_spot(&s, &rng, (Tile){1, 1}, 1, 5, &spot));   /* no T or D anywhere */
 
     CHECK_EQ(map_parse(&s, BAD_CHAR, 3, 3), -1);
     CHECK_EQ(map_parse(&s, BAD_LEN, 3, 3), -1);
