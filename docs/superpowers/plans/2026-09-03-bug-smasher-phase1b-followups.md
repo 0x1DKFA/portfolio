@@ -12,10 +12,14 @@ Deferred minor findings from the phase 1b task reviews, triaged as safe to leave
 - trash.c: dead `open_x ||` disjunct in the gust fallback; axis-separated collision could corner-cut on non-rectangular maps.
 - hunt.c: HUNT_NEW_TRAIL is vestigial; the redundant `!h->inspecting` clause after the early return in follow_path; lamp/trash sprites_add calls unguarded (44 of 64 slots used).
 - sim.c: sim_render_static ignores world_init's return, clobbers the live world by design (undocumented), and sim_poll_event is not gated on g_ready; the 250 ms clamp test is indirect.
-- shim.js: canvas backing reset on every applyMode; offscreen canvas recreated on mode changes; #squashed has no aria-live.
+- shim.js: canvas backing reset on every applyMode; offscreen canvas recreated on mode changes.
+- Footprint culling and HUD timers run inside the hunt step, before the camera step, so culling lags the camera by one frame (documented in spec §11).
 
 ## Polish ideas
 - Variable wall heights.
 - Rain.
 - Visitor steering.
 - Softer lamp light falloff.
+- Drainpipes on walls.
+- Flickering windows (time-varying pane hash).
+- A shared shade helper in draw.h.
