@@ -306,7 +306,7 @@ Memory is static: the framebuffer buffer is sized `640 × 320 × 4`; textures, t
   - Camera: turns the short way around ±π; arrives at a waypoint and stops; bob amplitude within 3 px.
   - Decals: a trail lays the expected number of pairs; sampling on a print returns glow > 0 and off it returns 0; culling removes prints more than 6 tiles behind.
   - Dogs stay on floor tiles for 60 s; trash moves only during gusts and stops at walls.
-  - Hunt: a full cycle from LOOK to NEW_TRAIL emits exactly one `BUG_SQUASHED`, lays a new trail of at least 12 steps, and is deterministic for a seed (two runs, same event frames).
+  - Hunt: a full cycle from LOOK to NEW_TRAIL emits exactly one `BUG_SQUASHED`, lays a new trail of at least 36 steps, and is deterministic for a seed (two runs, same event frames).
   - Exports: init bounds; framebuffer length; painted pixels in all four quadrants of a frame; static frame contains footprint yellow and hammer yellow; 250 ms clamp.
 - **Smoke:** `node test/wasm_smoke.mjs` checks zero imports, the eight exports, size, a rendered frame, and at least one squash event within 120 s of simulated time.
 - **Browser:** screenshots at 1440×900 (card left, alley right, hammer at bottom) and 390×844 (card full width over a still frame); `?motion=reduce`; console clean; network shows exactly the four files; the renamed-module fallback shows a plain card.

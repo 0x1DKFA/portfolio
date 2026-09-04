@@ -47,7 +47,7 @@ void test_hunt(void) {
     }
     CHECK(walked);
 
-    /* the first cycle completes with exactly one squash event, within 10 to 120 seconds */
+    /* the first cycle completes with exactly one squash event, within 25 to 70 seconds */
     int total = steps;
     while (hunt_cycles(&w) < 1 && total < 150 * 60) {
         world_step(&w, DT); total++;
