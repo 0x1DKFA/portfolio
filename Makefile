@@ -2,12 +2,12 @@ WASM_CC     ?= zig cc
 WASM_TARGET ?= -target wasm32-freestanding
 CC          ?= cc
 
-SIM_SRC  := $(wildcard sim/*.c sim/vignettes/*.c sim/actors/*.c)
-SIM_HDR  := $(wildcard sim/*.h sim/vignettes/*.h sim/actors/*.h)
+SIM_SRC  := $(wildcard sim/*.c sim/actors/*.c)
+SIM_HDR  := $(wildcard sim/*.h sim/actors/*.h)
 TEST_SRC := $(wildcard test/*.c)
 TEST_HDR := $(wildcard test/*.h)
 
-# -Isim: sources under sim/vignettes/ include "world.h" and "vignettes/x.h" relative to sim/
+# -Isim: sources under sim/actors/ include "world.h" and "actors/x.h" relative to sim/
 WASM_FLAGS := $(WASM_TARGET) -std=c11 -nostdlib -ffreestanding -fno-builtin -fvisibility=hidden \
               -mbulk-memory -O2 -g0 -Wall -Wextra -Isim -Wl,--no-entry -Wl,--strip-all
 TEST_FLAGS := -std=c11 -O0 -g -Wall -Wextra -fsanitize=address,undefined \
