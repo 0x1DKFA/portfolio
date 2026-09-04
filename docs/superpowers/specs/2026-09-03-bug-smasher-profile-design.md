@@ -3,7 +3,7 @@
 - **Date:** 2026-09-03
 - **Status:** Approved design, revision 4, ready for implementation planning
 - **Owner:** Rohit Kumar
-- **Revision:** 4 — the first screen is redesigned as a first-person alley hunt (a Doom-style raycaster) behind a compact card; the side panels, vignettes, and hover linking from revisions 1 to 3.1 are removed. Section 7 (settlement stage) is unchanged in intent.
+- **Revision:** 4.1 — pacing band for hiding spots, step order as built, naming, polish notes
 
 ## 1. Purpose and audience
 
@@ -46,7 +46,7 @@ Top to bottom:
 ## 4. Visual style
 
 - **First person at Doom's resolution.** About 200 logical pixels tall, width following the viewport aspect, chunky integer-scaled pixels. Walls are texture-mapped, the floor is flat, the sky is a skyline strip, sprites face the camera.
-- **Windy night.** Dark blue-black sky with skyscraper silhouettes and lit windows. Brick and concrete alley walls with grime, drainpipes, posters, lit windows in two or three colours (a few flicker), one neon sign with the author's first name and one generic sign. Street lamps brighten pools of floor. Distance fog darkens everything as it recedes.
+- **Windy night.** Dark blue-black sky with skyscraper silhouettes and lit windows. Brick and concrete alley walls with grime, posters, lit windows in two or three colours (flicker and drainpipes are polish items, see the phase 1b follow-ups), one neon sign with the author's first name and one generic sign. Street lamps brighten pools of floor. Distance fog darkens everything as it recedes.
 - **Palette.** About sixteen colours generated with the textures: asphalt greys, brick reds, concrete, window ambers and cyans, neon magenta, puddle blue, footprint yellow, hammer yellow, dog browns.
 - **Everything is procedural.** Textures, sprites, the skyline, and the HUD are generated at init from code and the seed. No image assets are loaded.
 - **Bugs and dogs are cute.** Round cartoon bug with two antennae; friendly pixel dogs with wagging tails. Never realistic.
@@ -93,9 +93,9 @@ Position in tile units, view angle in radians, field of view 85 degrees, eye hei
 | APPROACH | until in range | Within 2.5 tiles of the hiding spot the bug peeks out; the target angle becomes the bug's bearing; keep walking until within 1.0 tile and facing within 0.2 rad. |
 | SMASH | 0.4 s | Hammer swing; at 0.25 s the hit lands: dust puff sprite at the bug, bug removed, `+1` flash for 0.8 s, `BUG_SQUASHED` event. |
 | CELEBRATE | 1.0 s | A small hop. |
-| NEW_TRAIL | instant | Pick a hiding spot at least 12 BFS steps away; lay a new trail; back to LOOK. |
+| NEW_TRAIL | instant | Pick a hiding spot between 36 and 76 BFS steps away (falling back to at least 36, then the farthest); lay a new trail; back to LOOK. |
 
-A full cycle takes 30 to 60 s. Given a seed, the whole run is deterministic.
+A full cycle takes about 30 to 60 s for most seeds. Given a seed, the whole run is deterministic.
 
 ### 6.3 Trail and footprints
 
@@ -246,7 +246,7 @@ Memory is static: the framebuffer buffer is sized `640 × 320 × 4`; textures, t
 - `raycast_walls(World*, Framebuffer*, float *depth)`, `raycast_floor(World*, Framebuffer*)`, `raycast_sky(World*, Framebuffer*)`.
 - `sprites_draw(World*, Framebuffer*, const float *depth)` sorts and draws every active sprite.
 - `decals_clear`, `decals_lay_trail(Decals*, const Path*)`, `decals_sample(Decals*, fx, fy, out_glow)`, `decals_cull_behind(Decals*, trail_index)`.
-- `hunt_init(World*)`, `hunt_step(World*, dt)`, `hunt_state(const World*)`, `hunt_cycle_count(const World*)`.
+- `hunt_init(World*)`, `hunt_step(World*, dt)`, `hunt_state(const World*)`, `hunt_cycles(const World*)`.
 - `hud_draw(World*, Framebuffer*)`.
 
 ## 10. Renderer
@@ -262,7 +262,7 @@ Memory is static: the framebuffer buffer is sized `640 × 320 × 4`; textures, t
 ## 11. Frame loop and rendering order
 
 - Fixed logic step of 1/60s inside C with an accumulator; the shim calls `sim_update` once per animation frame with real elapsed milliseconds (clamped to 250 ms), then `sim_render`.
-- Per step: gusts and trash, dogs, the hunt state machine (which drives the camera), the camera, decal culling, HUD timers.
+- Per step: gusts and trash, dogs, the hunt state machine (which drives the camera, steps the HUD timers, and culls footprints behind the previous camera position), then the camera.
 - Per render: sky, walls (filling the depth buffer), floor, sprites, HUD.
 - The shim stops scheduling frames when the tab is hidden and resumes with a fresh timestamp.
 - **Static mode** (mobile and reduced motion): `sim_init`, `sim_render_static`, one blit, no loop.
