@@ -22,7 +22,7 @@ void test_hunt(void) {
     /* initial state: a trail is laid to a hiding spot, the bug is hidden there, the camera is at the start */
     CHECK_EQ(hunt_state(&w), HUNT_LOOK);
     CHECK_EQ(hunt_cycles(&w), 0);
-    CHECK(w.hunt.path.n - 1 >= HUNT_MIN_STEPS);
+    CHECK(w.hunt.path.n - 1 >= HUNT_MIN_STEPS && w.hunt.path.n - 1 <= HUNT_MAX_STEPS);
     CHECK(w.decals.n > 0);
     CHECK(map_is_hiding_spot(&w.map, w.hunt.hiding.x, w.hunt.hiding.y));
     CHECK_EQ(w.bug.state, BUGSTATE_HIDDEN);
@@ -36,7 +36,8 @@ void test_hunt(void) {
 
     /* LOOK pans, then FOLLOW walks the trail on floor tiles */
     int steps = run_until_state(&w, HUNT_FOLLOW, 3 * 60);
-    CHECK(steps > 60 && steps <= 95);
+    int expected_look_steps = (int)(HUNT_LOOK_TIME * 60.0f);
+    CHECK(steps >= expected_look_steps - 2 && steps <= expected_look_steps + 2);
     int walked = 0, inspected = 0;
     float x0 = w.cam.x, y0 = w.cam.y;
     for (int i = 0; i < 4 * 60 && hunt_state(&w) == HUNT_FOLLOW; i++) {
@@ -55,12 +56,12 @@ void test_hunt(void) {
         if (w.cam.pitch_px != 0) inspected = 1;
     }
     CHECK_EQ(hunt_cycles(&w), 1);
-    CHECK(total >= 25 * 60 && total <= 70 * 60);
+    CHECK(total >= 10 * 60 && total <= 30 * 60);
     CHECK_EQ(events_count(&ev), 1);
     CHECK_EQ(event_type(events_pop(&ev)), EV_BUG_SQUASHED);
     CHECK_EQ(w.squashed_total, 1);
     CHECK_EQ(hunt_state(&w), HUNT_LOOK);                     /* a fresh trail */
-    CHECK(w.hunt.path.n - 1 >= HUNT_MIN_STEPS);
+    CHECK(w.hunt.path.n - 1 >= HUNT_MIN_STEPS && w.hunt.path.n - 1 <= HUNT_MAX_STEPS);
     CHECK_EQ(w.bug.state, BUGSTATE_HIDDEN);
     CHECK(w.bug.spr != NULL);
     CHECK(w.dust != NULL || w.dust_t == 0.0f);

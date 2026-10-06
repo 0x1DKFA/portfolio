@@ -12,6 +12,14 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const staticMode = () => reduced.matches || !desktop.matches || params.get('motion') === 'reduce';
 const canvas = document.getElementById('scene');
 const counterEl = document.getElementById('squashed');
+const resumeDialog = document.getElementById('resume-dialog');
+
+document.querySelectorAll('[data-resume-open]').forEach((button) =>
+  button.addEventListener('click', () => resumeDialog.showModal()));
+document.querySelector('[data-resume-close]').addEventListener('click', () => resumeDialog.close());
+resumeDialog.addEventListener('click', (event) => {
+  if (event.target === resumeDialog) resumeDialog.close();
+});
 
 let sim = null, geom = null, off = null, raf = 0, last = 0, squashed = 0, resizeTimer = 0;
 let staticRendered = false;

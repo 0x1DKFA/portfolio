@@ -171,7 +171,9 @@ static void gen_hud(Color *px, const Color *pal, int frame) {
     int hx = 36, hy = 44, handle_x = 46, handle_y = 14, head_x = 34, head_y = 4;
     if (frame == 1) { hy = 40; handle_y = 4; head_x = 26; head_y = -4; }
     if (frame == 2) { hx = 44; hy = 46; handle_x = 52; handle_y = 32; head_x = 40; head_y = 20; }
+    draw_rect(&fb, handle_x - 1, handle_y - 1, 8, hy - handle_y + 6, pal[COL_BG]);
     draw_rect(&fb, handle_x, handle_y, 6, hy - handle_y + 4, pal[COL_HANDLE]);
+    draw_rect(&fb, head_x - 1, head_y - 1, 32, 16, pal[COL_BG]);
     draw_rect(&fb, head_x, head_y, 30, 14, pal[COL_HAMMER]);
     draw_rect(&fb, head_x, head_y + 6, 30, 2, pal[COL_HANDLE]);
     draw_rect(&fb, hx, hy, 24, HUD_H - hy, pal[COL_HAND]);

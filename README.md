@@ -1,30 +1,27 @@
 # Portfolio
 
-A personal profile page. One fixed, full-viewport canvas renders a first-person alley hunt — a raycaster written in C, compiled to a freestanding WebAssembly module with no imports and no framework — behind a compact hero card, driven by a small JavaScript shim. The card is plain HTML and CSS.
+A personal profile for a senior backend engineer. The page pairs production incident reports and concise work history with a first-person alley hunt rendered by a small C raycaster compiled to freestanding WebAssembly. The page layer is plain HTML, CSS, and a small JavaScript shim.
 
-## Layout
-
-```
-index.html  styles.css  shim.js   the page, its canvas and card, and the ~110-line shim
-sim.wasm                          the compiled simulation (committed; static hosts serve it)
-sim/                              C sources: trig, map, textures, camera, raycast, sprites, decals, actors, hud, hunt, world
-test/                             native test suite and a Node smoke test for the module
-docs/superpowers/                 design spec and implementation plans
-```
-
-## Build and test
-
-Requires `zig` (for `zig cc` with the wasm32 target) and Node 18+.
+## Files
 
 ```
-make test        # native tests with ASan/UBSan
-make sim.wasm    # rebuild the module
-make smoke       # instantiate sim.wasm in Node and render a frame
-make serve       # http://localhost:8000
+index.html  styles.css  shim.js   portfolio content, resume dialog, browser integration
+sim.wasm                          committed module served by static hosts
+sim/                              C simulation and procedural pixel art
+test/                             native test suite and WebAssembly smoke test
 ```
 
-Debug query parameters: `?seed=N` fixes the simulation seed; `?motion=reduce` shows the static frame.
+## Local use
 
-## Status
+The WebAssembly build requires Zig (`zig cc`) or a compatible Clang with wasm32 support. Node 18+ is needed for the smoke test.
 
-Phase 1b complete; phase 2 (settlement) planned.
+```
+make serve
+make sim.wasm
+make test
+make smoke
+```
+
+With Clang installed, build with `make WASM_CC=clang sim.wasm`. Debug query parameters: `?seed=N` fixes the simulation seed; `?motion=reduce` shows the static frame.
+
+GitHub Pages deploys the static files through `.github/workflows/pages.yml` on pushes to `master` or manually from the Actions tab.

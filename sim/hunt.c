@@ -82,8 +82,8 @@ void hunt_step(World *w, float dt) {
 
     switch (h->state) {
     case HUNT_LOOK:
-        if (h->t < 0.5f) camera_turn_to(c, h->look_base - HUNT_LOOK_SWEEP);
-        else if (h->t < 1.0f) camera_turn_to(c, h->look_base + HUNT_LOOK_SWEEP);
+        if (h->t < HUNT_LOOK_TIME / 3.0f) camera_turn_to(c, h->look_base - HUNT_LOOK_SWEEP);
+        else if (h->t < HUNT_LOOK_TIME * 2.0f / 3.0f) camera_turn_to(c, h->look_base + HUNT_LOOK_SWEEP);
         else if (h->path.n > 1) camera_face(c, wp_x(h, 1), wp_y(h, 1));
         if (h->t >= HUNT_LOOK_TIME) begin(h, HUNT_FOLLOW);
         break;

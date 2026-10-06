@@ -40,7 +40,7 @@ const Color PALETTE_NIGHT[COL_COUNT] = {
     [COL_BUG_DARK]      = COLOR(30, 60, 30),
     [COL_DUST]          = COLOR(170, 170, 190),
     [COL_HAND]          = COLOR(240, 200, 170),
-    [COL_HAMMER]        = COLOR(250, 200, 60),
+    [COL_HAMMER]        = COLOR(120, 210, 230),
     [COL_HANDLE]        = COLOR(120, 80, 60),
     [COL_TEXT]          = COLOR(235, 235, 245),
 };

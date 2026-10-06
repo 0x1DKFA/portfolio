@@ -3,61 +3,168 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rohit Kumar</title>
-  <meta name="description" content="[One-line description for search results]">
+  <meta name="description" content="Senior backend engineer working on distributed systems, production reliability, and performance in Go.">
+  <meta name="theme-color" content="#0a0c18">
+  <title>Rohit Kumar — Senior Backend Engineer</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <canvas id="scene" aria-hidden="true" role="presentation"></canvas>
 
-  <main class="stage">
-    <section id="hero" class="hero">
-      <header>
-        <h1>Rohit Kumar</h1>
-        <p class="title">[Title line: role, years, the stack you want to be hired for]</p>
-        <p class="pitch">[One sentence. Example tone: I fix the bugs that only happen in production, for one customer, on Fridays.]</p>
-      </header>
+  <main>
+    <section id="top" class="stage">
+      <div class="hero">
+        <nav class="topnav" aria-label="Main navigation">
+          <a class="wordmark" href="#top">RK<span> / FIELD NOTES</span></a>
+          <div class="nav-links">
+            <a href="#cases">Cases</a>
+            <a href="#work">Work</a>
+            <a href="#projects">Projects</a>
+          </div>
+        </nav>
 
-      <ul class="case-files" aria-label="Case files">
-        <li>
-          <article class="case-file">
-            <span class="tag">Race condition</span>
-            <p class="symptom">[Symptom: what users saw, one line]</p>
-            <p class="fix">[Fix: what you changed, one line]</p>
-          </article>
-        </li>
-        <li>
-          <article class="case-file">
-            <span class="tag">Heisenbug</span>
-            <p class="symptom">[Symptom: the bug that disappeared under observation]</p>
-            <p class="fix">[Fix: how you tracked it down]</p>
-          </article>
-        </li>
-        <li>
-          <article class="case-file">
-            <span class="tag">Regression</span>
-            <p class="symptom">[Symptom: the bug that kept coming back]</p>
-            <p class="fix">[Fix: the test or guard that made it stay fixed]</p>
-          </article>
-        </li>
-      </ul>
+        <header class="intro">
+          <p class="eyebrow"><span class="status-dot"></span> Backend systems · production hours</p>
+          <h1>Rohit Kumar</h1>
+          <p class="title">Senior backend engineer building distributed systems in Go.</p>
+          <p class="pitch">I like the problems that start with <em>“this only happens in production.”</em></p>
+          <div class="hero-links" aria-label="Contact and profile links">
+            <a class="button primary" href="mailto:rohitkk074@gmail.com">Get in touch <span aria-hidden="true">↗</span></a>
+            <button class="button" type="button" data-resume-open aria-haspopup="dialog" aria-controls="resume-dialog">Career summary <span aria-hidden="true">↗</span></button>
+            <a class="text-link" href="https://github.com/0x1DKFA" rel="me">GitHub ↗</a>
+          </div>
+        </header>
 
-      <nav class="contact" aria-label="Contact">
-        <a href="mailto:[you@example.com]">Email</a>
-        <a href="https://github.com/0x1DKFA" rel="me">GitHub</a>
-        <a href="resume.pdf">Resume</a>
-      </nav>
-
-      <p class="counter">bugs squashed this visit: <span id="squashed">0</span></p>
-      <p class="credit">Background: C compiled to WebAssembly, no framework, no art assets. <a href="https://github.com/0x1DKFA/portfolio">Source</a></p>
+        <div class="signal-row" aria-label="Selected impact">
+          <div><strong>100M+</strong><span>events processed</span></div>
+          <div><strong>1M+</strong><span>daily requests</span></div>
+          <div><strong>−60%</strong><span>ETL infrastructure cost</span></div>
+        </div>
+        <p class="scene-note"><span>LIVE SCENE</span> A bug is somewhere in this neighborhood. <span id="squashed">0</span> closed this visit.</p>
+      </div>
     </section>
+
+    <div class="below">
+      <section id="cases" class="section cases-section">
+        <div class="section-heading">
+          <p class="eyebrow">01 / Incident reports</p>
+          <h2>Find the signal.<br><span>Fix the system.</span></h2>
+          <p class="section-intro">The interesting part is rarely the alert. It’s finding the pressure point underneath it.</p>
+        </div>
+
+        <div class="case-files">
+          <article class="case-file">
+            <div class="case-top"><span class="tag">Memory pressure</span><span class="case-id">HM / 01</span></div>
+            <h3>The service kept running out of memory at peak.</h3>
+            <p>pprof exposed the OOM path; New Relic traces pointed to N+1 and unbounded database queries.</p>
+            <p class="fix">I coordinated fixes across the query paths and teams. The related production incidents stopped recurring.</p>
+            <p class="tools">pprof <span>·</span> New Relic <span>·</span> Go</p>
+          </article>
+
+          <article class="case-file">
+            <div class="case-top"><span class="tag">Lock contention</span><span class="case-id">HM / 02</span></div>
+            <h3>Incoming messages arrived up to ten minutes late.</h3>
+            <p>Frequent writes to conversation rows—sometimes across 10,000 conversations—were making PostgreSQL wait on itself.</p>
+            <p class="fix">Using <code>pg_stat_activity</code> and a blocking-process map, I traced the contention and redesigned unread-state storage. Peak-hour blocking effectively disappeared; the PagerDuty alert stopped recurring.</p>
+            <p class="tools">PostgreSQL <span>·</span> concurrency <span>·</span> incident response</p>
+          </article>
+
+          <article class="case-file wide">
+            <div class="case-top"><span class="tag">Lost state on deploy</span><span class="case-id">HM / 03</span></div>
+            <h3>A million-recipient broadcast shouldn’t depend on one process staying alive.</h3>
+            <p>The previous in-memory design could lose its place during a deployment.</p>
+            <p class="fix">I led a rebuild around durable Temporal workflows with configurable retries, plus timezone-aware delivery. Progress survived deployments and broadcasts could reach 1M+ recipients.</p>
+            <p class="tools">Temporal <span>·</span> durable workflows <span>·</span> messaging</p>
+          </article>
+        </div>
+        <p class="aside-note">At the scene: New Relic follows the trace, pprof checks memory, and Delve asks the goroutine where it was at the time of the race.</p>
+      </section>
+
+      <section id="work" class="section work-section">
+        <div class="section-heading compact-heading">
+          <p class="eyebrow">02 / Work history</p>
+          <h2>Systems under load.</h2>
+        </div>
+        <div class="timeline">
+          <article class="role">
+            <div class="role-meta"><h3>Heymarket</h3><span>Nov 2025 — Present</span></div>
+            <p class="role-title">Senior Software Engineer · Remote</p>
+            <p>Messaging infrastructure, production reliability, and high-throughput Go services. Built a URL shortener serving 1M+ daily requests at under 20ms P95, with per-recipient tracking streamed to BigQuery; mapped domain boundaries to guide a DDD restructuring.</p>
+          </article>
+          <article class="role">
+            <div class="role-meta"><h3>Kayrros</h3><span>Apr 2022 — Oct 2025</span></div>
+            <p class="role-title">Senior Software Engineer / Software Engineer · Bangalore</p>
+            <p>Led three engineers on a Go tile-delivery service under 100ms P90, cutting load on data infrastructure by 40%. Reworked a 100M+ event ETL pipeline to raise throughput 35% and reduce infrastructure costs 60%; also built async processing and geospatial analytics.</p>
+          </article>
+          <article class="role">
+            <div class="role-meta"><h3>Glider.ai</h3><span>Mar 2021 — Apr 2022</span></div>
+            <p class="role-title">Associate Software Engineer · Bangalore</p>
+            <p>Built event-driven recruitment analytics services and a Stripe billing system; added MFA and reCAPTCHA across the application.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="projects" class="section projects-section">
+        <div class="section-heading compact-heading">
+          <p class="eyebrow">03 / After hours</p>
+          <h2>Curiosity, compiled.</h2>
+        </div>
+        <article class="project">
+          <div class="project-mark" aria-hidden="true">C<br><span>→</span><br>WASM</div>
+          <div>
+            <div class="case-top"><span class="tag">Personal project</span><a href="https://github.com/0x1DKFA/portfolio">Source ↗</a></div>
+            <h3>A small alley, rendered from scratch.</h3>
+            <p>A procedural raycaster written in C and compiled to WebAssembly. The browser integration stays deliberately small; the renderer has no frontend framework, and the engine has native tests with sanitizer support.</p>
+            <p class="tools">C <span>·</span> WebAssembly <span>·</span> pixel rendering</p>
+          </div>
+        </article>
+        <p class="stack"><strong>Working set</strong> Go · PostgreSQL · Redis · Temporal · RabbitMQ · AWS · BigQuery · New Relic · pprof · Delve · C / WebAssembly</p>
+      </section>
+
+      <footer class="footer">
+        <a class="wordmark" href="#top">RK<span> / END OF FILE</span></a>
+        <div><a href="mailto:rohitkk074@gmail.com">Email</a><a href="https://github.com/0x1DKFA" rel="me">GitHub</a><button class="footer-resume" type="button" data-resume-open aria-haspopup="dialog" aria-controls="resume-dialog">Career summary</button></div>
+        <p>Background scene: C → WebAssembly. <a href="https://github.com/0x1DKFA/portfolio">Source</a></p>
+      </footer>
+    </div>
   </main>
 
-  <section class="below" id="more">
-    <h2>More</h2>
-    <p>[Experience and skills go here later.]</p>
-  </section>
+  <dialog id="resume-dialog" class="resume-dialog" aria-labelledby="resume-title">
+    <div class="resume-toolbar">
+      <p class="eyebrow">Career summary / Selected experience</p>
+      <button class="dialog-close" type="button" data-resume-close aria-label="Close career summary">×</button>
+    </div>
+    <div class="resume-scroll">
+      <header class="resume-intro">
+        <h2 id="resume-title">Rohit Kumar</h2>
+        <p>Senior backend engineer · Distributed systems, production reliability, Go</p>
+      </header>
+      <section class="resume-group">
+        <div class="resume-role"><h3>Heymarket</h3><span>Senior Software Engineer (IC3) · Nov 2025 — Present</span></div>
+        <ul>
+          <li>Diagnosed recurring peak-load OOMs with pprof and New Relic; coordinated fixes that stopped the incidents from recurring.</li>
+          <li>Traced message delays of up to 10 minutes to PostgreSQL lock contention, then redesigned unread-state storage to remove the write bottleneck.</li>
+          <li>Led a Temporal rebuild for durable broadcasts to 1M+ recipients, with configurable retries and timezone-aware delivery.</li>
+        </ul>
+      </section>
+      <section class="resume-group">
+        <div class="resume-role"><h3>Kayrros</h3><span>Software Engineer → Senior Software Engineer · Apr 2022 — Oct 2025</span></div>
+        <ul>
+          <li>Led a three-person team building a Go tile service with sub-100ms P90 latency and 40% less load on data infrastructure.</li>
+          <li>Improved a 100M+ event ETL pipeline: 35% more throughput and 60% lower infrastructure cost.</li>
+          <li>Tuned Elasticsearch clusters to cut CPU usage by 20% and related incidents by 25%.</li>
+        </ul>
+      </section>
+      <section class="resume-group">
+        <div class="resume-role"><h3>Glider.ai</h3><span>Associate Software Engineer · Mar 2021 — Apr 2022</span></div>
+        <ul>
+          <li>Built event-driven recruitment analytics services with Node.js, MongoDB, RabbitMQ, and Elasticsearch.</li>
+          <li>Delivered subscription billing with Stripe and strengthened account security with MFA and reCAPTCHA.</li>
+        </ul>
+      </section>
+    </div>
+  </dialog>
 
   <script type="module" src="shim.js"></script>
 </body>
