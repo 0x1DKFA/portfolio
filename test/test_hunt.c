@@ -5,7 +5,7 @@
 #define DT (1.0f / 60.0f)
 static uint8_t px[640 * 320 * 4];
 static int same(Color a, Color b) { return a.r == b.r && a.g == b.g && a.b == b.b; }
-static int yellow(Color c) { return c.r > 180 && c.g > 130 && c.b < 110; }
+static int accent(Color c) { return c.r > 180 && c.g > 55 && c.g < 130 && c.b < 100; }
 
 static int run_until_state(World *w, int state, int max_steps) {
     for (int i = 0; i < max_steps; i++) { world_step(w, DT); if (hunt_state(w) == state) return i + 1; }
@@ -103,9 +103,9 @@ void test_hunt(void) {
     int hammer = 0;
     for (int y = 130; y < 200; y++) for (int x = 120; x < 200; x++) if (same(fb_get(&fb, x, y), PALETTE_NIGHT[COL_HAMMER])) hammer++;
     CHECK(hammer > 100);
-    int yellow_floor = 0;
-    for (int y = hz + 1; y < 200; y++) for (int x = 0; x < 320; x++) if (yellow(fb_get(&fb, x, y)) && !same(fb_get(&fb, x, y), PALETTE_NIGHT[COL_HAMMER])) yellow_floor++;
-    CHECK(yellow_floor > 20);                                      /* footprints ahead */
+    int accent_floor = 0;
+    for (int y = hz + 1; y < 200; y++) for (int x = 0; x < 320; x++) if (accent(fb_get(&fb, x, y)) && !same(fb_get(&fb, x, y), PALETTE_NIGHT[COL_HAMMER])) accent_floor++;
+    CHECK(accent_floor > 20);                                      /* orange footprints ahead */
 
     /* an inspect pause must never be read as arrival, even if APPROACH starts during it */
     world_init(&w, 5u, 320, 200, &ev, "ROHIT");
@@ -123,6 +123,17 @@ void test_hunt(void) {
     CHECK_EQ(w.cam.pitch_px, 0);
     CHECK(w.cam.walking);                                                          /* and the leg resumed */
     CHECK(camera_dist(&w.cam, mid_x, mid_y) < 0.1f);                              /* from where it stood */
+
+    /* A stationary dog blocks the camera instead of letting it pass through. */
+    world_init(&w, 5u, 320, 200, &ev, "ROHIT");
+    w.hunt.state = HUNT_FOLLOW; w.hunt.inspect_timer = 100.0f;
+    w.hunt.bug_x = 20.5f; w.hunt.bug_y = 20.5f;
+    for (int i = 0; i < w.n_dogs; i++) { w.dogs[i].state = DOG_SNIFF; w.dogs[i].t = 100.0f; }
+    w.dogs[0].x = 3.5f; w.dogs[0].y = 2.5f;
+    camera_walk_to(&w.cam, 4.5f, 2.5f);
+    for (int i = 0; i < 120; i++) world_step(&w, DT);
+    CHECK(w.cam.x < 3.1f);
+    CHECK(w.cam.walking);
 
     /* the largest framebuffer works too */
     Framebuffer big; fb_init(&big, px, 640, 320);

@@ -38,7 +38,7 @@ void test_hud(void) {
     for (int i = 0; i < 48; i++) hud_step(&h, DT);
     CHECK(h.plus_t <= 0.001f);
 
-    /* drawing: hammer yellow at the bottom centre, nothing at the top; +1 while flashing; bob shifts it */
+    /* drawing: orange hammer at the bottom centre, nothing at the top; +1 while flashing; bob shifts it */
     Framebuffer fb; fb_init(&fb, px, 320, 200);
     draw_clear(&fb, pal[COL_BG]);
     hud_draw(&h, &t, pal, &fb, 0);

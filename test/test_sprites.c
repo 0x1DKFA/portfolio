@@ -78,5 +78,5 @@ void test_sprites(void) {
     draw_clear(&fb, pal[COL_BG]);
     sprites_draw(&sp, &cam, &m, &t, pal, &fb, depth, horizon, proj);
     Color mid = fb_get(&fb, 160, horizon + 60);
-    CHECK(mid.g > mid.r);                                                /* bug green, not trash grey */
+    CHECK(mid.r > mid.g);                                                /* bug orange, not trash grey */
 }

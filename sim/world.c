@@ -12,6 +12,25 @@ static void prop_position(const Map *m, int x, int y, float *px, float *py) {
     }
 }
 
+static int camera_hits_obstacle(const World *w, float x, float y) {
+    const float camera_radius = 0.18f;
+    for (int i = 0; i < w->map.n_spawns; i++) {
+        const Spawn *s = &w->map.spawns[i];
+        if (s->kind != PROP_LAMP && s->kind != PROP_TRASH) continue;
+        float ox, oy;
+        prop_position(&w->map, s->x, s->y, &ox, &oy);
+        float radius = camera_radius + (s->kind == PROP_LAMP ? 0.18f : 0.23f);
+        float dx = x - ox, dy = y - oy;
+        if (dx * dx + dy * dy < radius * radius) return 1;
+    }
+    for (int i = 0; i < w->n_dogs; i++) {
+        float dx = x - w->dogs[i].x, dy = y - w->dogs[i].y;
+        const float radius = camera_radius + 0.27f;
+        if (dx * dx + dy * dy < radius * radius) return 1;
+    }
+    return 0;
+}
+
 int world_init(World *w, uint32_t seed, int width, int height, EventQueue *events, const char *neon_text) {
     if (width < WORLD_MIN_W || width > WORLD_MAX_W || height < WORLD_MIN_H || height > WORLD_MAX_H) return -1;
     w->w = width; w->h = height; w->events = events; w->time = 0.0f; w->squashed_total = 0;
@@ -58,7 +77,12 @@ void world_step(World *w, float dt) {
     for (int i = 0; i < w->n_loose; i++) loose_step(&w->loose[i], &w->map, &w->wind, dt);
     for (int i = 0; i < w->n_dogs; i++) dog_step(&w->dogs[i], &w->map, &w->decals, &w->rng, dt);
     hunt_step(w, dt);
+    float old_x = w->cam.x, old_y = w->cam.y;
     camera_step(&w->cam, dt);
+    if (camera_hits_obstacle(w, w->cam.x, w->cam.y)) {
+        w->cam.x = old_x; w->cam.y = old_y;
+        w->cam.walking = 1;
+    }
     w->time += dt;
 }
 

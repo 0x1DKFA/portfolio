@@ -20,8 +20,16 @@ static float next_inspect(World *w) {
 static void new_trail(World *w) {
     Hunt *h = &w->hunt; Camera *c = &w->cam;
     Tile from = { (int)c->x, (int)c->y };
-    if (!map_pick_hiding_spot(&w->map, &w->rng, from, HUNT_MIN_STEPS, HUNT_MAX_STEPS, &h->hiding)) h->hiding = from;
-    if (!map_bfs(&w->map, from, h->hiding, &h->path) || h->path.n < 1) { h->path.n = 1; h->path.t[0] = from; }
+    Tile previous = h->hiding;
+    int has_previous = h->cycles > 0;
+    int found = 0, picked = 0;
+    for (int attempt = 0; attempt < 8; attempt++) {
+        if (!map_pick_hiding_spot(&w->map, &w->rng, from, HUNT_MIN_STEPS, HUNT_MAX_STEPS, &h->hiding)) break;
+        picked = 1;
+        if (!has_previous || h->hiding.x != previous.x || h->hiding.y != previous.y) { found = 1; break; }
+    }
+    if (!found && !picked) h->hiding = from;
+    if (!map_bfs_random(&w->map, &w->rng, from, h->hiding, &h->path) || h->path.n < 1) { h->path.n = 1; h->path.t[0] = from; }
     decals_lay_trail(&w->decals, &h->path);
     decals_set_head_waypoint(&w->decals, 0);
     h->waypoint = 1; h->walking_to = -1;

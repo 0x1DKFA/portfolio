@@ -121,6 +121,10 @@ int map_is_floor(const Map *m, int x, int y) {
     return m->cell[y][x] == CELL_FLOOR;
 }
 
+int map_is_walkable(const Map *m, int x, int y) {
+    return map_is_floor(m, x, y) && m->prop[y][x] != PROP_LAMP && m->prop[y][x] != PROP_TRASH;
+}
+
 int map_wall_kind(const Map *m, int x, int y) {
     if (x < 0 || y < 0 || x >= m->w || y >= m->h) return CELL_BRICK;
     return m->cell[y][x];
@@ -138,7 +142,7 @@ int map_distances(const Map *m, Tile from, int16_t *dist) {
     static int queue[MAP_W * MAP_H];
     int n = m->w * m->h, head = 0, tail = 0, reach = 0;
     for (int i = 0; i < n; i++) dist[i] = -1;
-    if (!map_is_floor(m, from.x, from.y)) return 0;
+    if (!map_is_walkable(m, from.x, from.y)) return 0;
     dist[from.y * m->w + from.x] = 0;
     queue[tail++] = from.y * m->w + from.x;
     while (head < tail) {
@@ -146,7 +150,7 @@ int map_distances(const Map *m, Tile from, int16_t *dist) {
         reach++;
         for (int d = 0; d < 4; d++) {
             int nx = cx + DX[d], ny = cy + DY[d];
-            if (!map_is_floor(m, nx, ny)) continue;
+            if (!map_is_walkable(m, nx, ny)) continue;
             int ni = ny * m->w + nx;
             if (dist[ni] >= 0) continue;
             dist[ni] = (int16_t)(dist[cur] + 1);
@@ -156,10 +160,10 @@ int map_distances(const Map *m, Tile from, int16_t *dist) {
     return reach;
 }
 
-int map_bfs(const Map *m, Tile from, Tile to, Path *out) {
+static int map_bfs_impl(const Map *m, Rng *rng, Tile from, Tile to, Path *out) {
     static int16_t dist[MAP_W * MAP_H];
     out->n = 0;
-    if (!map_is_floor(m, to.x, to.y)) return 0;
+    if (!map_is_walkable(m, to.x, to.y)) return 0;
     map_distances(m, from, dist);
     int ti = to.y * m->w + to.x;
     if (dist[ti] < 0 || dist[ti] + 1 > MAP_MAX_PATH) return 0;
@@ -170,26 +174,34 @@ int map_bfs(const Map *m, Tile from, Tile to, Path *out) {
         out->t[k] = cur;
         if (k == 0) break;
         int cd = dist[cur.y * m->w + cur.x];
+        int choices[4], n_choices = 0;
         for (int d = 0; d < 4; d++) {
             int nx = cur.x + DX[d], ny = cur.y + DY[d];
-            if (map_is_floor(m, nx, ny) && dist[ny * m->w + nx] == cd - 1) { cur.x = nx; cur.y = ny; break; }
+            if (map_is_walkable(m, nx, ny) && dist[ny * m->w + nx] == cd - 1) choices[n_choices++] = d;
+        }
+        if (n_choices) {
+            int d = choices[rng ? rng_range(rng, 0, n_choices - 1) : 0];
+            cur.x += DX[d]; cur.y += DY[d];
         }
     }
     return 1;
 }
+
+int map_bfs(const Map *m, Tile from, Tile to, Path *out) { return map_bfs_impl(m, 0, from, to, out); }
+int map_bfs_random(const Map *m, Rng *rng, Tile from, Tile to, Path *out) { return map_bfs_impl(m, rng, from, to, out); }
 
 int map_is_connected(const Map *m) {
     static int16_t dist[MAP_W * MAP_H];
     int floors = 0;
     Tile any = { -1, -1 };
     for (int y = 0; y < m->h; y++) for (int x = 0; x < m->w; x++)
-        if (m->cell[y][x] == CELL_FLOOR) { floors++; if (any.x < 0) { any.x = x; any.y = y; } }
+        if (map_is_walkable(m, x, y)) { floors++; if (any.x < 0) { any.x = x; any.y = y; } }
     if (floors == 0) return 1;
     return map_distances(m, any, dist) == floors;
 }
 
 int map_is_hiding_spot(const Map *m, int x, int y) {
-    if (!map_is_floor(m, x, y) || m->prop[y][x] == PROP_TRASH) return 0;
+    if (!map_is_walkable(m, x, y)) return 0;
     for (int d = 0; d < 4; d++) {
         int nx = x + DX[d], ny = y + DY[d];
         if (nx < 0 || ny < 0 || nx >= m->w || ny >= m->h) continue;

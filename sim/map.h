@@ -31,11 +31,13 @@ extern const char *const CITY_MAP[MAP_H];
 
 int   map_parse(Map *m, const char *const *rows, int w, int h);   /* 0 ok, -1 bad size or char */
 int   map_is_floor(const Map *m, int x, int y);                   /* 0 outside the map */
+int   map_is_walkable(const Map *m, int x, int y);                /* floor without solid props */
 int   map_wall_kind(const Map *m, int x, int y);                  /* CELL_*; outside is CELL_BRICK */
 float map_light(const Map *m, int x, int y);                      /* 0.25 outside */
 int   map_bfs(const Map *m, Tile from, Tile to, Path *out);       /* 1 if found; path has both ends */
-int   map_distances(const Map *m, Tile from, int16_t *dist);      /* dist[y*w+x]; -1 unreachable; returns reachable count */
-int   map_is_connected(const Map *m);
+int   map_bfs_random(const Map *m, Rng *rng, Tile from, Tile to, Path *out);
+int   map_distances(const Map *m, Tile from, int16_t *dist);      /* walkable-tile distances; -1 unreachable */
+int   map_is_connected(const Map *m);                            /* all walkable tiles are connected */
 int   map_is_hiding_spot(const Map *m, int x, int y);             /* floor, 4-adjacent to a trash can or dumpster */
 int   map_pick_hiding_spot(const Map *m, Rng *rng, Tile from, int min_steps, int max_steps, Tile *out); /* random spot with min_steps <= dist <= max_steps; else dist >= min_steps; else the farthest */
 

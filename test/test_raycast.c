@@ -11,7 +11,7 @@ static const char *const ROOM[7] = {
 static uint8_t px[320 * 200 * 4];
 static float depth[320];
 static int same(Color a, Color b) { return a.r == b.r && a.g == b.g && a.b == b.b; }
-static int yellow(Color c) { return c.r > 180 && c.g > 130 && c.b < 110; }
+static int accent(Color c) { return c.r > 180 && c.g > 55 && c.g < 130 && c.b < 100; }
 
 void test_raycast(void) {
     static Map m; static Textures t; static Decals d;
@@ -89,13 +89,13 @@ void test_raycast(void) {
     decals_set_head_waypoint(&d, 0);
     raycast_floor(&m, &t, pal, &d, &cam, proj, &fb, horizon, depth);
     Color fl = fb_get(&fb, 160, h - 1);
-    CHECK(fl.b >= fl.r && fl.r > 10);                          /* asphalt-ish, shaded */
-    int yellow_below = 0, yellow_above = 0;
+    CHECK(fl.r > fl.b && fl.r > 10);                           /* warm asphalt, shaded */
+    int accent_below = 0, accent_above = 0;
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
-        if (yellow(fb_get(&fb, x, y))) { if (y > horizon) yellow_below++; else yellow_above++; }
+        if (accent(fb_get(&fb, x, y))) { if (y > horizon) accent_below++; else accent_above++; }
     }
-    CHECK(yellow_below > 40);
-    CHECK_EQ(yellow_above, 0);
+    CHECK(accent_below > 40);
+    CHECK_EQ(accent_above, 0);
     /* the floor never paints over the wall: the row just above the wall's bottom is wall-coloured */
     int wall_bottom = horizon + (int)(RAY_WALL_BOTTOM / 4.5f * proj);
     CHECK(fb_get(&fb, 160, wall_bottom - 1).r > fb_get(&fb, 160, wall_bottom - 1).b);

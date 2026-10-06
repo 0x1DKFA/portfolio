@@ -4,7 +4,7 @@
 #include "world.h"
 
 static int same(Color a, const Color *b) { return a.r == b->r && a.g == b->g && a.b == b->b; }
-static int yellow(const uint8_t *p) { return p[0] > 180 && p[1] > 130 && p[2] < 110; }
+static int accent(const uint8_t *p) { return p[0] > 180 && p[1] > 55 && p[1] < 130 && p[2] < 100; }
 
 static int painted(const uint8_t *px, int w, int h) {
     int n = 0;
@@ -55,9 +55,9 @@ void test_sim(void) {
     /* static frame: footprints and the hammer, deterministic */
     sim_render_static();
     px = sim_framebuffer();
-    int yellow_px = 0;
-    for (int i = 0; i < 356 * 200; i++) if (yellow(px + i * 4) && !same((Color){ px[i*4], px[i*4+1], px[i*4+2], 255 }, &PALETTE_NIGHT[COL_HAMMER])) yellow_px++;
-    CHECK(yellow_px > 20);
+    int accent_px = 0;
+    for (int i = 0; i < 356 * 200; i++) if (accent(px + i * 4) && !same((Color){ px[i*4], px[i*4+1], px[i*4+2], 255 }, &PALETTE_NIGHT[COL_HAMMER])) accent_px++;
+    CHECK(accent_px > 20);
     CHECK(has_color(px, 356, 200, &PALETTE_NIGHT[COL_HAMMER]));
     CHECK_EQ(sim_poll_event(), 0u);
     static uint8_t copy[640 * 320 * 4];

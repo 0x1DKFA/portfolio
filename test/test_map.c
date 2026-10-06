@@ -51,6 +51,9 @@ void test_map(void) {
     CHECK(news >= 3);
     CHECK_EQ(m.prop[6][1], PROP_DOG);
     CHECK_EQ(m.prop[1][3], PROP_LAMP);
+    CHECK(!map_is_walkable(&m, 3, 1));
+    CHECK(!map_is_walkable(&m, 18, 1));
+    CHECK(map_is_walkable(&m, 2, 2));
 
     /* light: a lamp tile is fully lit, far floor is ambient */
     CHECK_NEAR(map_light(&m, 3, 1), 1.0f, 1e-4);
@@ -79,10 +82,22 @@ void test_map(void) {
         for (int k = 1; k < p.n; k++) {          /* consecutive tiles are 4-neighbours on floor */
             int dx = p.t[k].x - p.t[k - 1].x, dy = p.t[k].y - p.t[k - 1].y;
             CHECK((dx == 0 && (dy == 1 || dy == -1)) || (dy == 0 && (dx == 1 || dx == -1)));
-            CHECK(map_is_floor(&m, p.t[k].x, p.t[k].y));
+            CHECK(map_is_walkable(&m, p.t[k].x, p.t[k].y));
         }
     }
     CHECK(map_pick_hiding_spot(&m, &rng, from, 200, 300, &spot));  /* no candidate that far: fallback to the farthest */
+
+    /* Equal length routes should vary with the supplied RNG. */
+    Rng route_rng; rng_seed(&route_rng, 77u);
+    Path route, first_route;
+    CHECK(map_bfs_random(&m, &route_rng, (Tile){2, 2}, (Tile){17, 1}, &route));
+    first_route = route;
+    int varied = 0;
+    for (int i = 0; i < 12; i++) {
+        CHECK(map_bfs_random(&m, &route_rng, (Tile){2, 2}, (Tile){17, 1}, &route));
+        for (int k = 0; k < route.n; k++) if (route.t[k].x != first_route.t[k].x || route.t[k].y != first_route.t[k].y) { varied = 1; break; }
+    }
+    CHECK(varied);
 
     /* small map: BFS detour length, unreachable pocket, connectivity false */
     static Map s;

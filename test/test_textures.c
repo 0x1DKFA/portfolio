@@ -88,7 +88,7 @@ void test_textures(void) {
     CHECK(same(texture_sky(&t, 7, -10), texture_sky(&t, 7, 0)));
     CHECK(same(texture_sky(&t, 7, SKY_H + 10), texture_sky(&t, 7, SKY_H - 1)));
 
-    /* hud frames exist and differ; the hammer head is yellow */
+    /* hud frames exist and differ; the hammer head is orange */
     for (int f = 0; f < HUD_FRAMES; f++) CHECK(count_color(t.hud[f], HUD_W * HUD_H, pal[COL_HAMMER]) > 200);
     CHECK(checksum(t.hud[0], HUD_W * HUD_H) != checksum(t.hud[1], HUD_W * HUD_H));
     CHECK(checksum(t.hud[1], HUD_W * HUD_H) != checksum(t.hud[2], HUD_W * HUD_H));
