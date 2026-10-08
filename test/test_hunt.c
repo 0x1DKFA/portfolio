@@ -5,7 +5,7 @@
 #define DT (1.0f / 60.0f)
 static uint8_t px[640 * 320 * 4];
 static int same(Color a, Color b) { return a.r == b.r && a.g == b.g && a.b == b.b; }
-static int accent(Color c) { return c.r > 180 && c.g > 55 && c.g < 130 && c.b < 100; }
+static int accent(Color c) { return c.b > 180 && c.g > 130 && c.r < 110; }
 
 static int run_until_state(World *w, int state, int max_steps) {
     for (int i = 0; i < max_steps; i++) { world_step(w, DT); if (hunt_state(w) == state) return i + 1; }
@@ -105,7 +105,7 @@ void test_hunt(void) {
     CHECK(hammer > 100);
     int accent_floor = 0;
     for (int y = hz + 1; y < 200; y++) for (int x = 0; x < 320; x++) if (accent(fb_get(&fb, x, y)) && !same(fb_get(&fb, x, y), PALETTE_NIGHT[COL_HAMMER])) accent_floor++;
-    CHECK(accent_floor > 20);                                      /* orange footprints ahead */
+    CHECK(accent_floor > 20);                                      /* cyan footprints ahead */
 
     /* an inspect pause must never be read as arrival, even if APPROACH starts during it */
     world_init(&w, 5u, 320, 200, &ev, "ROHIT");

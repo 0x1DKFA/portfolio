@@ -4,7 +4,7 @@
 #include "world.h"
 
 static int same(Color a, const Color *b) { return a.r == b->r && a.g == b->g && a.b == b->b; }
-static int accent(const uint8_t *p) { return p[0] > 180 && p[1] > 55 && p[1] < 130 && p[2] < 100; }
+static int accent(const uint8_t *p) { return p[2] > 180 && p[1] > 130 && p[0] < 110; }
 
 static int painted(const uint8_t *px, int w, int h) {
     int n = 0;

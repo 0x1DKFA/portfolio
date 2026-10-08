@@ -11,7 +11,7 @@ static const char *const ROOM[7] = {
 static uint8_t px[320 * 200 * 4];
 static float depth[320];
 static int same(Color a, Color b) { return a.r == b.r && a.g == b.g && a.b == b.b; }
-static int accent(Color c) { return c.r > 180 && c.g > 55 && c.g < 130 && c.b < 100; }
+static int accent(Color c) { return c.b > 180 && c.g > 130 && c.r < 110; }
 
 void test_raycast(void) {
     static Map m; static Textures t; static Decals d;
